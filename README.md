@@ -59,7 +59,7 @@ flowchart TB
 
 **Lectura del flujo.**
 1. El *PromptMutator* genera una generación de variantes desde el *seed* o desde los mejores del frente Pareto actual.
-2. Cada candidato entra al *RacingEvaluator*, que evalúa en mini-batches crecientes y descarta统计学mente a los perdedores (Holm-Bonferroni) — esto minimiza llamadas caras a LLM.
+2. Cada candidato entra al *RacingEvaluator*, que evalúa en mini-batches crecientes y descartando a los perdedores (Holm-Bonferroni) — esto minimiza llamadas caras a LLM.
 3. El *MultiObjectiveScorer* computa la función objetivo CAPO (accuracy menos costo de entrada penalizado).
 4. El *BrevityFeedbackGenerator* (CROP) toma las salidas largas del modelo objetivo y emite *rewrites* más breves + puntaje de brevedad, que se inyectan como retroalimentación para la siguiente generación.
 5. El *IterationController* decide si continuar (vuelve al Mutator) o parar y emitir el **frente Pareto** final.
@@ -97,7 +97,7 @@ flowchart TB
 | Aspecto | Detalle |
 |---|---|
 | **Responsabilidad** | Para las salidas largas, generar (a) una versión más breve y (b) un puntaje cualitativo de brevedad. |
-| **Modelo interno** | "Critic LM" — puede ser el mismo proveedor o uno más barato/barato. |
+| **Modelo interno** | "Critic LM" — puede ser el mismo proveedor o uno más barato/rápido. |
 | **Entradas** | Pares `(prompt, output)` consumidos en exceso de tokens. |
 | **Salidas** | `feedback_text`, `rewritten_output`, `brevity_score` (0–1). |
 | **Acoplamiento** | Conecta con el *CostModel* para decidir cuándo una salida merece retroalimentación. |
@@ -177,7 +177,7 @@ flowchart TB
 | **tenacity** | Retry policies con backoff exponencial por tipo de error (rate-limit vs. timeout vs. 5xx). |
 | **ratelimit / aiolimiter** | Token-bucket local antes de llamar a la API. |
 | **asyncio + httpx** | Concurrencia masiva en el Racing (varios candidatos en paralelo). |
-| **TQM / rich** | Barras de progreso y reporte en CLI. |
+| **TQDM / rich** | Barras de progreso y reporte en CLI. |
 
 ### 4.5 Tracking de experimentos (opcional pero recomendado)
 | Componente | Uso |
@@ -196,7 +196,7 @@ flowchart TB
 - Empaquetado: **uv** o **poetry**; contenedores opcionales.
 - Si la paralelización del Racing escala más allá de unos cientos de candidatos en paralelo, considerar **Ray** sobre asyncio.
 
-> **Principio rector:** preferir proveedores de infraestructura que ya tienen DSPy/LiteLLM/Tested contra. Evitar reinventar el *prompt pipeline*; ser aplicación alrededor del Racing + CROP loop.
+> **Principio rector:** preferir proveedores de infraestructura que ya tienen DSPy/LiteLLM probados en producción. Evitar reinventar el *prompt pipeline*; ser una aplicación alrededor del bucle Racing + CROP.
 
 ---
 
@@ -283,7 +283,7 @@ flowchart TB
 
 ## 7. Supuestos y Riesgos de Diseño
 
-**Supuestos** (asumidos, no validados con paper en mano tras compactación):
+**Supuestos**:
 - CAPO describe Holm-Bonferroni como método principal; alternativa Sidak mencionada en literatura relacionada.
 - CROP define `λ` como coeficiente de regularización por longitud (puede llamarse también `β` en algunas versiones).
 - Ambos papers asumen acceso a un dataset etiquetado de evaluación — no optimizan el prompt en línea con feedback humano escalar.
