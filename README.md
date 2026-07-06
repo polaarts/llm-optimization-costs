@@ -1,298 +1,226 @@
-# Arquitectura de Software: Optimizador de Prompts Integral y Consciente del Costo
+# CAPO × CROP — pipeline unificado de optimización de prompts
 
-> **Propósito.** Unificar los enfoques de **CAPO** (Cost-Aware Prompt Optimization, centrado en *costo de entrada* vía Racing algorítmico) y **CROP** (Cost-Regularized Optimization of Prompts, centrado en *costo de salida* vía retroalimentación textual de un Critic LM) en un único pipeline declarativo-iterativo que produce prompts Pareto-óptimos `(accuracy, cost_in, cost_out)`.
->
-> **Nota metodológica.** Este documento es un **diseño de alto nivel** — define módulos, contratos de datos, flujo de control y supuestos de stack. No incluye código de implementación todavía. Tras la aprobación del diseño se derivará una especificación de interfaz (proto/JSON-Schema/Pydantic) y un plan de hitos.
+Prototipo de investigación que integra dos métodos conscientes del costo:
+
+- **CAPO** (*Cost-Aware Prompt Optimization* — Zehle et al., 2025): optimiza el costo de entrada con un algoritmo de *racing* y Holm-Bonferroni.
+- **CROP** (*Cost-Regularized Optimization of Prompts* — Amanchukwu et al., 2025): optimiza el costo de salida con un Critic LM que produce *feedback* textual de brevedad.
+
+El aporte propio es un *pipeline* declarativo-iterativo único que produce prompts Pareto-óptimos sobre `(accuracy, cost_in, cost_out)`.
 
 ---
 
-## 1. Diagrama de Flujo de Datos (Mermaid.js)
+## 1. Quickstart (5–10 minutos)
 
-```mermaid
-flowchart TB
-    %% --- Capa de Entrada ---
-    Seed[("Prompt Seed<br/>(instrucción inicial +<br/>pocos ejemplos de referencia)")]
-    Dataset[("Dataset de tareas<br/>train / dev / hold-out")]
-    Budget{{"Presupuesto y<br/>objetivo de Pareto<br/>(α, β, λ)"}}
+```bash
+# 1. Clonar e instalar dependencias
+git clone <repo>
+pip install -r requirements.txt
 
-    %% --- Motor de Optimización ---
-    Mutator["PromptMutator<br/>(operadores genéticos)"]
-    Candidates["Pool de Candidatos<br/>(generación N por iteración)"]
-    Racing["RacingEvaluator<br/>(CAPO: Holm-Bonferroni)"]
-    MOScorer["MultiObjectiveScorer<br/>(accuracy − α·cost_in)"]
-    BFG["BrevityFeedbackGenerator<br/>(CROP: Critic LM)"]
-    CostModel["CostModel<br/>(tokens × pricing)"]
-    Controller["IterationController<br/>(orquesta el bucle)"]
-    Checker{{"ConvergenceChecker<br/>(presupuesto / meseta /<br/>Pareto estable)"}}
+# 2. Configurar credenciales
+cp .env.example .env
+# editar .env y completar:
+#   API_KEY=<tu-key>
+#   URL_API_BASE=https://api.minimax.io/v1
+#   MODEL=MiniMax-M2.5-highspeed
 
-    %% --- Estado Persistente ---
-    Lineage[("LineageStore<br/>grafo prompt→prompt")]
-    Metrics[("MetricsLog<br/>JSONL por candidato")]
+# 3. (Opcional) Regenerar el dataset toy (63 ejemplos QA en español)
+python -m src.data_gen
 
-    %% --- Salida ---
-    Pareto[("Frente Pareto<br/>(accuracy, cost_in, cost_out)")]
+# 4. Correr las 4 condiciones × 3 seeds
+python -m experiments.run_all --seeds 0 1 2 --budget 5
 
-    Seed --> Mutator
-    Dataset --> Racing
-    Budget --> Controller
-    Mutator --> Candidates
-    Candidates --> Racing
-    Racing --> MOScorer
-    MOScorer -->|early-stop| Controller
-    Racing <--> CostModel
-    MOScorer --> BFG
-    BFG -->|rewrites cortos| Candidates
-    Controller --> Checker
-    Racing --> Lineage
-    MOScorer --> Metrics
-    BFG --> Metrics
-    Checker -->|continuar| Mutator
-    Checker -->|parar| Pareto
+# 5. Agregar, analizar y graficar
+python -m analysis.aggregate
+python -m analysis.stats
+python -m analysis.figures
 
-    classDef store fill:#eef,stroke:#88a
-    classDef opt  fill:#efe,stroke:#8a8
-    classDef llm  fill:#fee,stroke:#a88
-    class Lineage,Metrics,Pareto store
-    class Mutator,MOScorer,CostModel,Controller,Checker opt
-    class Racing,BFG llm
+# 6. Tests
+python -m pytest tests/ -v
 ```
 
-**Lectura del flujo.**
-1. El *PromptMutator* genera una generación de variantes desde el *seed* o desde los mejores del frente Pareto actual.
-2. Cada candidato entra al *RacingEvaluator*, que evalúa en mini-batches crecientes y descartando a los perdedores (Holm-Bonferroni) — esto minimiza llamadas caras a LLM.
-3. El *MultiObjectiveScorer* computa la función objetivo CAPO (accuracy menos costo de entrada penalizado).
-4. El *BrevityFeedbackGenerator* (CROP) toma las salidas largas del modelo objetivo y emite *rewrites* más breves + puntaje de brevedad, que se inyectan como retroalimentación para la siguiente generación.
-5. El *IterationController* decide si continuar (vuelve al Mutator) o parar y emitir el **frente Pareto** final.
+Si solo quieres probar la integración sin gastar API, todos los *scripts* admiten `--condition <nombre>` para correr una condición puntual.
 
 ---
 
-## 2. Desglose de Módulos
+## 2. Decisiones de diseño
 
-### 2.1 `PromptMutator`
-| Aspecto | Detalle |
+| Decisión | Por qué |
 |---|---|
-| **Responsabilidad** | Aplicar operadores de mutación genética sobre prompts padre. |
-| **Operadores previstos** | `paraphrase`, `add_constraint`, `swap_fewshot`, `toggle_cot`, `compact_instructions`, `seed_from_history`. |
-| **Entradas** | Lista de prompts padre, presupuesto restante, lista de operadores habilitados. |
-| **Salidas** | `List[Candidate]` con campo `parent_id` trazable. |
-| **Estado interno** | Caché LRU de mutaciones vistas para diversidad. |
-
-### 2.2 `RacingEvaluator` (núcleo CAPO)
-| Aspecto | Detalle |
-|---|---|
-| **Responsabilidad** | Evaluar candidatos en paralelo sobre mini-batches crecientes; descartar perdedores con Holm-Bonferroni cuando su margen de ventaja es estadísticamente significativo. |
-| **Entradas** | Pool de candidatos, dataset etiquetado, `min_batch`, `max_batch`, tamaño de efecto mínimo. |
-| **Salidas** | Subconjunto superviviente + métricas por candidato (`mean_acc`, `p_value`, `rounds_used`). |
-| **Garantía** | Reduce ~70 % de las llamadas al LLM manteniendo ranking de calidad (supuesto del paper CAPO). |
-| **Estado** | Stream asíncrono; necesita *cancellation tokens* para interrumpir perdedores temprano. |
-
-### 2.3 `MultiObjectiveScorer`
-| Aspecto | Detalle |
-|---|---|
-| **Responsabilidad** | Calcular la función objetivo combinada. Soporta CAPO puro `(acc − α·cost_in)` y extensiones multi-objetivo vía suma ponderada o Pareto dominance real. |
-| **Entradas** | Métricas crudas del candidato, vector de pesos `(α, β)`. |
-| **Salidas** | `score`, vector `(accuracy, cost_in, cost_out)`. |
-
-### 2.4 `BrevityFeedbackGenerator` (núcleo CROP)
-| Aspecto | Detalle |
-|---|---|
-| **Responsabilidad** | Para las salidas largas, generar (a) una versión más breve y (b) un puntaje cualitativo de brevedad. |
-| **Modelo interno** | "Critic LM" — puede ser el mismo proveedor o uno más barato/rápido. |
-| **Entradas** | Pares `(prompt, output)` consumidos en exceso de tokens. |
-| **Salidas** | `feedback_text`, `rewritten_output`, `brevity_score` (0–1). |
-| **Acoplamiento** | Conecta con el *CostModel* para decidir cuándo una salida merece retroalimentación. |
-
-### 2.5 `CostModel`
-| Aspecto | Detalle |
-|---|---|
-| **Responsabilidad** | Centralizar la medición de tokens y costo monetario. |
-| **Fuentes** | `tiktoken` para tokens lógicos (verificar drift), conteo reportado por API cuando esté disponible, tabla de precios por proveedor. |
-| **Salidas** | `cost_in`, `cost_out`, `cost_total` por `(prompt, output)`. |
-
-### 2.6 `LineageStore`
-| Aspecto | Detalle |
-|---|---|
-| **Responsabilidad** | Mantener el grafo `prompt → {children, scores, cost}`. |
-| **Consultas típicas** | "¿De qué seed viene este candidato?", "¿Cuál es el camino más corto a un prompt Pareto?", "Eliminar rama subóptima". |
-| **Persistencia** | SQLite o Postgres; opcional Neo4j si la profundidad del árbol lo justifica. |
-
-### 2.7 `IterationController`
-| Aspecto | Detalle |
-|---|---|
-| **Responsabilidad** | Orquestar el bucle principal, gestionar presupuesto (tokens USD / llamadas), y exponer hooks para reintentos, logging y checkpointing. |
-| **Política** | Configurable: greedy, ε-greedy, NSGA-II para verdadero multi-objetivo. |
-| **Salidas** | `next_generation`, `stop_signal`. |
-
-### 2.8 `ConvergenceChecker`
-| Aspecto | Detalle |
-|---|---|
-| **Responsabilidad** | Decidir cuándo detener la optimización. |
-| **Criterios** | (a) presupuesto agotado, (b) mejora marginal < ε en K rondas consecutivas, (c) frente Pareto estable por N iteraciones, (d) presupuesto de tiempo cumplido. |
+| **Sin MLflow / W&B / DVC** | Para 1 semana la infraestructura mata. JSONL + CSV basta. |
+| **Dataset toy propio (63 ejemplos)** | Control de variabilidad, *scoring* determinístico, cero dependencias de HuggingFace. |
+| **MiniMax como objetivo Y Critic** | Una sola API key, una sola cuenta de costos. Configurable vía `MODEL`. |
+| **2 operadores de mutación** (`paraphrase`, `add_constraint`) | Cubre los efectos más reportados; `swap_fewshot` queda como opcional. |
+| **Holm-Bonferroni en el racing** | Más conservador que el t-test pareado del *paper* CAPO; protege contra eliminación prematura. |
+| **Política percentil 70 del Critic** | Invoca al Critic solo cuando la salida supera el P70 del *pool* (sigue a CROP). |
+| **`temperature = 0`** por defecto | Reduce (sin eliminar) el no-determinismo de la API. |
+| **Mock LLM para tests** | `_enable_mock()` activa respuestas deterministas; los 24 *smoke tests* pasan sin red. |
 
 ---
 
-## 3. Gestión de Estado y Persistencia
+## 3. Estructura del repositorio
 
-| Tipo de dato | Tamaño típico | Volumen esperado | Almacén propuesto | Justificación |
-|---|---|---|---|---|
-| **Lineaje prompt→prompt + scores** | ~2 KB/candidato | 10³–10⁵ candidatos | **Postgres** (esquema relacional simple) | Índices en `parent_id` y `score`; consultas SQL ad-hoc fáciles. |
-| **Métricas crudas por candidato** | ~5 KB (JSONL con logs por batch) | Miles de archivos | **JSON Lines en object storage** (S3/MinIO) o filesystem local si volumen bajo | Anexo al registro relacional por FK. |
-| **Frente Pareto** | Decenas | Constante | **SQLite embebido** (versión single-user) o tabla en Postgres | Lectura barata para UI/export. |
-| **Estado en vivo de iteración** | KB | Único | **Redis opcional** (checkpointing) o archivos `.pkl`/JSON | Permite reanudar corridas largas. |
-| **Grafo evolutivo profundo (>500 niveles)** | Grande | Raro | **Neo4j opcional** | Para visualización tipo "árbol genealógico" o análisis de operadores. |
-| **Embeddings de prompts (few-shot retrieval)** | ~1.5 KB/vector | Miles | **Chroma o Qdrant opcional** | Solo si se activa retrieval-augmented mutation. |
-
-**Reglas de retención.**
-- Crudos `JSONL`: 90 días, luego compresión cold-storage.
-- Tabla relacional: indefinida (costos de almacenamiento despreciables).
-- Snapshots del frente: versionados en Git LFS o DVC si se quiere reproducibilidad experimental.
+```
+capo-crop-unified/
+├── README.md                 ← este archivo
+├── requirements.txt
+├── .env.example
+├── .gitignore
+├── data/
+│   └── toy_qa.jsonl          ← 63 ejemplos QA en español
+├── src/
+│   ├── config.py             ← carga .env y expone Settings
+│   ├── data_gen.py           ← genera el dataset toy
+│   ├── llm_client.py         ← wrapper LiteLLM + retries + JSONL logging
+│   ├── cost_model.py         ← tokens → USD
+│   ├── mutator.py            ← paraphrase, add_constraint, swap_fewshot
+│   ├── racing.py             ← RacingEvaluator + Holm-Bonferroni
+│   ├── scorer.py             ← MultiObjectiveScorer + LLM-as-judge
+│   ├── critic.py             ← BrevityFeedbackGenerator (Critic LM)
+│   ├── pipeline.py           ← run_baseline / run_capo / run_crop / run_unified
+│   └── utils/
+│       ├── seeds.py          ← set_seed reproducible
+│       ├── stats.py          ← Wilcoxon, bootstrap, Cohen's d
+│       └── logging.py        ← JSONLLogger
+├── experiments/
+│   ├── run_baseline.py
+│   ├── run_capo.py
+│   ├── run_crop.py
+│   ├── run_unified.py
+│   └── run_all.py            ← corre las 4 condiciones × N seeds
+├── analysis/
+│   ├── aggregate.py          ← consolida JSONL → CSV
+│   ├── stats.py              ← Wilcoxon pareado + bootstrap CI
+│   └── figures.py            ← genera las 3 figuras
+├── tests/
+│   ├── test_racing.py        ← invariantes Holm + no-false-elimination
+│   ├── test_cost_model.py
+│   ├── test_pareto.py
+│   ├── test_scorer.py
+│   └── test_pipeline.py      ← smoke tests con LLM mock
+├── reports/
+│   ├── informe.md            ← fuente markdown
+│   └── informe.pdf           ← versión PDF
+├── presentation/
+│   └── slides.md             ← 10 slides para defensa
+└── results/
+    ├── raw/                  ← JSONL por condición/seed
+    ├── tables/               ← CSV (summary, long, stats)
+    └── figures/              ← PNG de las 3 figuras
+```
 
 ---
 
-## 4. Stack Tecnológico Recomendado
+## 4. Hiperparámetros por defecto
 
-### 4.1 Núcleo de orquestación
-| Componente | Recomendación | Por qué |
+| Parámetro | Valor | Origen |
 |---|---|---|
-| **DSPy** (`dspy` ≥ 2.5) | Adoptar como framework de optimización declarativa. Sus módulos `Predict`, `ChainOfThought`, `Signature` mapean 1:1 con nuestros `PromptMutator`. Compatible con assert/optimize. |
-| **LiteLLM** (`litellm`) | Capa de abstracción multi-proveedor (OpenAI, Anthropic, Bedrock, vLLM local). Maneja JSON mode, retries, streaming, costos. |
-| **Pydantic v2** | Contratos de datos y validación. Generación de JSON-Schema para I/O entre módulos. |
+| `alpha` (Holm) | 0.2 | Default CAPO |
+| `gamma` (long. CAPO) | 0.05 | Default CAPO |
+| `block_size` | 3–10 | Adaptado a `len(dev)` |
+| `z_max` | 2–6 | Deriva de `len(dev) // block_size` |
+| `population_size` | 4 | Reducido por restricción de tiempo |
+| `crossovers_per_iter` | 3 | Suficiente para 4 supervivientes |
+| `n_survive` | 2 | Mitad de la población |
+| `n_generations` | 2 | Suficiente para observar Pareto |
+| `beta` (long. CROP) | 0.05 | Default CROP |
 
-### 4.2 Computación numérica y estadística
-| Componente | Uso |
-|---|---|
-| **scipy.stats** | Holm-Bonferroni y Sidak para el RacingEvaluator. |
-| **statsmodels** | (Opcional) Familias de tests alternativas (Wilcoxon pareado, etc.) si el dataset es chico. |
-| **pandas / polars** | Análisis offline de corridas y comparaciones A/B. |
-
-### 4.3 Conteo de tokens y pricing
-| Componente | Uso |
-|---|---|
-| **tiktoken** (o equivalente por proveedor) | Conteo local; **validar contra la API** porque el drift entre tokenizadores locales y de proveedor es una fuente silenciosa de errores de presupuesto. |
-| **`litellm.cost_per_token`** | Tabla de precios unificada; *snapshot* diario para auditoría. |
-
-### 4.4 Resiliencia y concurrencia
-| Componente | Uso |
-|---|---|
-| **tenacity** | Retry policies con backoff exponencial por tipo de error (rate-limit vs. timeout vs. 5xx). |
-| **ratelimit / aiolimiter** | Token-bucket local antes de llamar a la API. |
-| **asyncio + httpx** | Concurrencia masiva en el Racing (varios candidatos en paralelo). |
-| **TQDM / rich** | Barras de progreso y reporte en CLI. |
-
-### 4.5 Tracking de experimentos (opcional pero recomendado)
-| Componente | Uso |
-|---|---|
-| **MLflow** o **Weights & Biases** | Versionado de prompts, scores, hiperparámetros, datasets. Integración directa con DSPy posible vía callbacks. |
-
-### 4.6 Calidad y observabilidad
-| Componente | Uso |
-|---|---|
-| **OpenTelemetry** | Tracing distribuido (Racing → MOScorer → BFG) para diagnosticar latencia. |
-| **pydantic-settings** | Configuración 12-factor (YAML/env). |
-| **pytest + hypothesis** | Tests unitarios + property-based para invariantes (p. ej. "ningún score puede ser negativo si todos los pesos lo son"). |
-
-### 4.7 Lenguaje y runtime
-- **Python 3.11+** (tipos modernos, asyncio maduro, performance).
-- Empaquetado: **uv** o **poetry**; contenedores opcionales.
-- Si la paralelización del Racing escala más allá de unos cientos de candidatos en paralelo, considerar **Ray** sobre asyncio.
-
-> **Principio rector:** preferir proveedores de infraestructura que ya tienen DSPy/LiteLLM probados en producción. Evitar reinventar el *prompt pipeline*; ser una aplicación alrededor del bucle Racing + CROP.
+Todos los hiperparámetros son configurables desde `config.py` o como flags de los *scripts* de `experiments/`.
 
 ---
 
-## 5. Cuellos de Botella Críticos y Mitigaciones
+## 5. Cómo correr una condición puntual
 
-### 5.1 Rate-limits de proveedor
-**Riesgo:** un Racing con 64 candidatos en paralelo contra GPT-4o o Claude satura las cuotas por minuto y devuelve 429s en cascada.
-**Mitigaciones:**
-- Token-bucket local con `aiolimiter`, ajustado al *RPM/TPM* del tier de cuenta.
-- Backoff adaptativo por proveedor en `tenacity`.
-- Pipelining por lotes pequeños (5–10 candidatos concurrentes), no ráfagas.
-- *Auto-fallback* a un proveedor alternativo vía `litellm.fallbacks` cuando se agota la cuota.
+```bash
+# Baseline
+python -m experiments.run_baseline --seed 0 --budget 5
 
-### 5.2 Latencia del evaluador (LLM-as-judge vs. exact match)
-**Riesgo:** la métrica de calidad es a menudo otro LLM (LLM-as-judge), duplicando el costo y la latencia.
-**Mitigaciones:**
-- Preferir **métricas exactas** cuando el dominio lo permita (clasificación cerrada, regex, código ejecuta tests).
-- Para CROP, una variante con métricas exact-match + heurística de longitud basta en muchos casos.
-- Si el judge es inevitable: usar un modelo más barato (Haiku, GPT-4o-mini) y validar contra gold-standard periódicamente para detectar drift.
+# CAPO
+python -m experiments.run_capo --seed 0 --budget 5 --generations 2 --population 4
 
-### 5.3 Convergencia prematura del Racing
-**Riesgo:** Holm-Bonferroni descarta candidatos en lotes muy tempranos por ruido, eliminando variantes buenas que habrían destacado con más datos.
-**Mitigaciones:**
-- Tamaño mínimo del primer mini-batch debe ser ≥ `(k * log α / δ²)` estilo Hoeffding adaptado al número de candidatos pareados.
-- Re-checkpointing: si en una iteración posterior aparece un candidato del mismo linaje con buen score, re-promoverlo.
-- Logging del `p_value` final; descartar solo cuando la confianza es robusta.
+# CROP
+python -m experiments.run_crop --seed 0 --budget 5 --iterations 2
 
-### 5.4 Drift de tokens entre tokenizador local y del proveedor
-**Riesgo:** `tiktoken` no coincide con el conteo real del proveedor (especialmente Anthropic, Bedrock, modelos custom). El presupuesto se subestima/sobreestima.
-**Mitigaciones:**
-- Sonda inicial de calibración: medir 100 prompts de muestra y guardar el ratio `local/provider`.
-- Usar siempre el `usage` reportado por la respuesta en `CostModel`; el local solo para *búsqueda* previa.
-- Si un proveedor no reporta usage, al menos usar el conteo que expone `litellm.completion(...).usage`.
+# Unified
+python -m experiments.run_unified --seed 0 --budget 5 --generations 2 --population 4
+```
 
-### 5.5 Calidad de los *few-shot* mutados
-**Riesgo:** Swap aleatorio de ejemplos degrada el prompt. CAPO reportó que pocos shots (≤2) suelen ser óptimos, pero no es universal.
-**Mitigaciones:**
-- Limitar el operador `swap_fewshot` a intercambios validados semánticamente (embedding-similarity threshold).
-- Operador `compact_examples` que quita ejemplos redundantes descubiertos por similitud coseno.
-- A/B por iteración: nunca reemplazar el pool entero, mantener un *elite* (top-k invicto) entre generaciones.
+Cada *script* escribe:
 
-### 5.6 Costos ocultos del CoT
-**Riesgo:** activar CoT aumenta *tokens de salida* sin ganancia proporcional de accuracy en tareas simples.
-**Mitigaciones:**
-- Operador `toggle_cot` que prueba ambos modos como dos candidatos distintos; la MultiObjectiveScorer penalizará automáticamente al perdedor.
-- Política adaptativa: CoT solo cuando el *FewShotPrompt* supera un umbral de accuracy crudo.
-
-### 5.7 Determinismo y reproducibilidad
-**Riesgo:** APIs estocásticas (temperature > 0) hacen no reproducibles los scores.
-**Mitigaciones:**
-- Por defecto `temperature = 0` en evaluaciones; reservamos temperatura para mutación/exploración.
-- Sembrar todo RNG interno (`numpy`, `random`).
-- Capturar `model_version`, `provider`, `seed` en cada `JSONL log entry`.
-
-### 5.8 Presión de presupuesto sobre el Critic LM (CROP)
-**Riesgo:** el BrevityFeedbackGenerator también cuesta; si se invoca sobre cada candidato la factura se duplica.
-**Mitigaciones:**
-- Solo invocar BFG para candidatos que **sobreviven** al Racing y cuyo `cost_out` excede el percentil 70 del pool actual.
-- Cachear las reescrituras por hash `(prompt_template, output)`.
-
-### 5.9 Versionado de datasets y prompts
-**Riesgo:** cambios en el dataset invalidan comparaciones históricas.
-**Mitigaciones:**
-- Versionar datasets con **DVC** o hashes en el LineageStore (`dataset_sha`).
-- Cada experimento almacena un snapshot del dataset, no referencias mutables.
-
-### 5.10 Observabilidad del frente Pareto
-**Riesgo:** difícil saber *por qué* un prompt es Pareto-óptimo.
-**Mitigaciones:**
-- Adjuntar a cada punto Pareto un `explain()`: features del prompt + scores desglosados por subgrupo.
-- UI mínima (Streamlit o plotly) sobre `LineageStore` para inspección visual.
+- `results/raw/<condición>/seed<N>.jsonl` — log JSONL con cada llamada al LLM.
+- `results/raw/<condición>/seed<N>.json` — resumen de métricas (accuracy, costo, prompt final).
 
 ---
 
-## 6. Hitos Sugeridos (orden de ejecución propuesto)
+## 6. Cómo regenerar entregables
 
-1. **Hito 0 — Sandbox.** Repo, entorno (uv), configuración, Pydantic schemas, primeros conectores LiteLLM verificados con un prompt trivial.
-2. **Hito 1 — Racing vertical.** `RacingEvaluator` + `CostModel` end-to-end sobre dataset juguete; validar ahorro de llamadas vs. evaluación completa.
-3. **Hito 2 — Mutator + Línea base.** `PromptMutator` con 3 operadores; primera corrida CAPO pura (sin CROP).
-4. **Hito 3 — CROP integrado.** `BrevityFeedbackGenerator`, política de invocación selectiva, primer Pareto `(acc, cost_in, cost_out)`.
-5. **Hito 4 — Producción.** Concurrencia robusta, rate-limits, retries, OTel, tracking en MLflow, documentación de uso.
+```bash
+# CSV consolidados
+python -m analysis.aggregate         # → results/tables/summary.csv, long.csv
+python -m analysis.stats             # → results/tables/stats.csv
 
----
+# Figuras
+python -m analysis.figures           # → results/figures/figure{1,2,3}_*.png
 
-## 7. Supuestos y Riesgos de Diseño
-
-**Supuestos**:
-- CAPO describe Holm-Bonferroni como método principal; alternativa Sidak mencionada en literatura relacionada.
-- CROP define `λ` como coeficiente de regularización por longitud (puede llamarse también `β` en algunas versiones).
-- Ambos papers asumen acceso a un dataset etiquetado de evaluación — no optimizan el prompt en línea con feedback humano escalar.
-
-**Riesgos** que requieren decisión explícita antes del Hito 1:
-- ¿Optimizamos solo `cost_in`, solo `cost_out`, o ambos simultáneamente? El diseño actual es multi-objetivo puro; un modo "solo CAPO" o "solo CROP" simplificaría la primera entrega.
-- ¿Política por defecto: maximización de accuracy dentro de presupuesto, o minimización de costo dentro de accuracy mínima?
-- ¿Modelo "Critic" de CROP: mismo proveedor o uno más barato? Impacta costo total.
+# PDF del informe (requiere pandoc + Chrome)
+pandoc reports/informe.md -o reports/informe.html --standalone
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+    --headless --disable-gpu --no-sandbox \
+    --print-to-pdf=reports/informe.pdf reports/informe.html
+```
 
 ---
 
-*Fin del documento de arquitectura. Próximo paso natural: revisión con el solicitante y derivación de contratos de interfaz (JSON-Schema o Pydantic) por módulo antes de pasar a implementación.*
+## 7. Limitaciones conocidas
+
+- **API no determinista.** `temperature = 0` no garantiza igualdad bit-a-bit. Los números pueden variar entre corridas; el Wilcoxon pareado mitiga esto.
+- **Dataset toy.** 63 ejemplos no captura la complejidad de BIG-bench ni GSM8K. Las conclusiones se re-evaluarán a mayor escala en el siguiente hito.
+- **Holm-Bonferroni en lugar de t-test sin corrección.** Decisión propia de la especificación; diverge del *paper* CAPO. Con Holm el *racing* es más conservador.
+- **3 *seeds*.** Poca potencia estadística. El README sugiere 5 *seeds* si el tiempo lo permite.
+- **Default apunta a `api.minimax.io`.** Si tu contrato está en `api.minimaxi.com` (plan legado), override `URL_API_BASE` en `.env`.
+- **Reasoning tokens de MiniMax-M2.5-highspeed.** El modelo emite tokens de razonamiento interno en **70–99%** de la salida facturada, incluso para prompts triviales. Los parámetros `thinking: {type: disabled}` (M3), `reasoning: {enabled: false}` y `reasoning_effort: 0` **no surten efecto** en M2.5. `LLMResponse` expone `reasoning_tokens` por separado para que el *pipeline* y `cost_model.py` puedan desglosar el costo si lo desean.
+- **Sin *ablation* exhaustiva.** No se corrieron `capo-sin-Racing` ni `crop-sin-Critic`; documentado en `reports/informe.md` §7.2.
+
+---
+
+## 8. Tests
+
+```bash
+python -m pytest tests/ -v
+```
+
+Resultado esperado: **24/24 pasan** (Holm-Bonferroni invariantes, modelo de costos, dominancia de Pareto, *scoring*, *pipeline* end-to-end con LLM *mock*).
+
+Si un test falla, el mensaje indica exactamente qué invariante se rompió — útil para diagnosticar cambios accidentales en el *racing* o el *scoring*.
+
+---
+
+## 9. Smoke test de la API (día 1)
+
+Antes de correr cualquier experimento, valida que el *string* del modelo es correcto:
+
+```bash
+python -c "
+from src.llm_client import LLMClient
+client = LLMClient()
+resp = client.complete('Di hola en una sola palabra.', temperature=0.0, role='smoke')
+print('model:', resp.model, 'tokens_in:', resp.tokens_in, 'tokens_out:', resp.tokens_out, 'latency_ms:', resp.latency_ms)
+print('text:', resp.text)
+"
+```
+
+Si el *output* muestra números razonables (`tokens_in > 0`, `latency_ms > 0`), el *endpoint* está operativo. Si no, revisa `URL_API_BASE` y `MODEL` en `.env`.
+
+---
+
+## 10. Referencias
+
+1. Zehle, T., Schlager, M., Heiß, T., & Feurer, M. (2025). *CAPO: Cost-Aware Prompt Optimization.* arXiv:2504.16005.
+2. Amanchukwu et al. (2025). *CROP: Cost-Regularized Optimization of Prompts.*
+3. Guo, Q. et al. (2024). *EvoPrompt.* NeurIPS 2024.
+4. Birattari, M. et al. (2002). *F-Race.* GECCO 2002.
+5. Holm, S. (1979). *A simple sequentially rejective multiple test procedure.* Scand. J. Stat.
+6. Khattab, O. et al. (2024). *DSPy: Compiling Declarative LM Calls into Self-Improving Pipelines.* ICLR 2024.
+7. BerriAI. *LiteLLM.* https://github.com/BerriAI/litellm
+8. MiniMax. *API documentation.* https://platform.MiniMax.com/
+
+---
