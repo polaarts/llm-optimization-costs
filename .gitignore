@@ -1,1 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+*.pem
+
+# Local outputs
+!results/raw/.gitkeep
+!results/figures/.gitkeep
+!results/tables/.gitkeep
+*.log
+
+# OS / IDE
 .DS_Store
+.idea/
+.vscode/
+
+papers/
+presentation/
+reports/
