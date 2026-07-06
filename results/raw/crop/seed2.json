@@ -1,0 +1,19 @@
+{
+  "condition": "crop",
+  "seed": 2,
+  "final_prompt": "Eres un asistente útil. Piensa paso a paso en voz alta, justifica cada decisión con detalle, y entrega la respuesta final entre <final_answer>...</final_answer>.\n\nNota del editor: Eliminar contexto pedagógico (análisis, pasos numerados) y conservar solo la respuesta esencial.\nIntenta ser tan conciso como esta versión: El efecto invernadero se intensifica por la acumulación de gases como CO₂, CH₄ y N₂O provenientes de combustibles fósiles, deforestación e industria, que atrapan el calor infrarrojo emitido por la superficie terrestre.",
+  "accuracy": 0.75,
+  "accuracy_short": 0.4,
+  "accuracy_long": 1.0,
+  "judge_score_long": 0.8571428571428573,
+  "tokens_in_total": 3691,
+  "tokens_out_total": 865,
+  "cost_in_usd": 0.0022145999999999997,
+  "cost_out_usd": 0.0020759999999999997,
+  "cost_total_usd": 0.0042905999999999994,
+  "latency_ms_mean": 32853.701986166656,
+  "n_generations": 2,
+  "n_llm_calls": 36,
+  "elapsed_seconds": 394.24553625,
+  "pricing_model": "MiniMax-M3"
+}

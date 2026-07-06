@@ -1,0 +1,19 @@
+{
+  "condition": "crop",
+  "seed": 4,
+  "final_prompt": "Eres un asistente útil. Piensa paso a paso en voz alta, justifica cada decisión con detalle, y entrega la respuesta final entre <final_answer>...</final_answer>.\n\nNota del editor: El texto original repetía ideas (definición del sesgo, ejemplos, contexto evolutivo). Eliminé redundancias, ejemplos redundantes y explicaciones extensas, conservando solo la definición central y los 4 puntos clave del impacto en análisis de datos.\nIntenta ser tan conciso como esta versión: Sesgo de confirmación: tendencia a buscar/interpretar datos que confirman creencias previas, ignorando los contradictorios. En análisis de datos, afecta la formulación de hipótesis, selección de muestras, elección de métricas e interpretación de resultados, comprometiendo la objetividad.",
+  "accuracy": 0.5,
+  "accuracy_short": 0.25,
+  "accuracy_long": 1.0,
+  "judge_score_long": 0.9,
+  "tokens_in_total": 4125,
+  "tokens_out_total": 1350,
+  "cost_in_usd": 0.002475,
+  "cost_out_usd": 0.0032400000000000003,
+  "cost_total_usd": 0.0057150000000000005,
+  "latency_ms_mean": 44965.39537149996,
+  "n_generations": 2,
+  "n_llm_calls": 36,
+  "elapsed_seconds": 539.5859142080008,
+  "pricing_model": "MiniMax-M3"
+}

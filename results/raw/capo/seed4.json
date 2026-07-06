@@ -1,0 +1,20 @@
+{
+  "condition": "capo",
+  "seed": 4,
+  "final_prompt": "Ofrece una contestación lo más precisa posible a la pregunta formulada. Cuando sea adecuado, muestra el resultado concluyente encerrado entre las etiquetas <final_answer>...</final_answer>.",
+  "accuracy": 0.3333333333333333,
+  "accuracy_short": 0.5,
+  "accuracy_long": 0.0,
+  "judge_score_long": 0.20930178212702108,
+  "tokens_in_total": 2769,
+  "tokens_out_total": 1771,
+  "cost_in_usd": 0.0016614000000000002,
+  "cost_out_usd": 0.0042504,
+  "cost_total_usd": 0.0059118,
+  "latency_ms_mean": 55462.14714933332,
+  "n_generations": 2,
+  "n_llm_calls": 12,
+  "n_survivors": 2,
+  "elapsed_seconds": 665.5469363750001,
+  "pricing_model": "MiniMax-M3"
+}

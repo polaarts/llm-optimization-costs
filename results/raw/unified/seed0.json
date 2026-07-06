@@ -1,0 +1,19 @@
+{
+  "condition": "unified",
+  "seed": 0,
+  "final_prompt": "Actúa como un asistente breve y exacto. Limítate a una o dos oraciones y encierra tu contestación entre <final_answer>...</final_answer>.\n\nCondición extra: entrega primero la respuesta definitiva y, después, una justificación concisa.",
+  "accuracy": 0.8333333333333334,
+  "accuracy_short": 0.3333333333333333,
+  "accuracy_long": 1.0,
+  "judge_score_long": 0.8277777777777778,
+  "tokens_in_total": 2926,
+  "tokens_out_total": 909,
+  "cost_in_usd": 0.0017556000000000002,
+  "cost_out_usd": 0.0021815999999999997,
+  "cost_total_usd": 0.0039372,
+  "latency_ms_mean": 46452.444749999966,
+  "n_generations": 2,
+  "n_llm_calls": 36,
+  "elapsed_seconds": 557.4305962089993,
+  "pricing_model": "MiniMax-M3"
+}

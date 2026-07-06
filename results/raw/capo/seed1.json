@@ -1,0 +1,20 @@
+{
+  "condition": "capo",
+  "seed": 1,
+  "final_prompt": "Brinda una respuesta lo más exacta posible a la pregunta planteada. Siempre que sea pertinente, presenta el resultado definitivo dentro de las etiquetas <final_answer>...</final_answer>.\n\nRestricción adicional: Responde en máximo 30 palabras.",
+  "accuracy": 0.08333333333333333,
+  "accuracy_short": 0.125,
+  "accuracy_long": 0.0,
+  "judge_score_long": 0.2629879266554007,
+  "tokens_in_total": 2868,
+  "tokens_out_total": 366,
+  "cost_in_usd": 0.0017208,
+  "cost_out_usd": 0.0008784,
+  "cost_total_usd": 0.0025992,
+  "latency_ms_mean": 39316.251628416656,
+  "n_generations": 2,
+  "n_llm_calls": 12,
+  "n_survivors": 2,
+  "elapsed_seconds": 471.79625220899993,
+  "pricing_model": "MiniMax-M3"
+}

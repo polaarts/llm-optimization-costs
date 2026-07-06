@@ -1,0 +1,19 @@
+{
+  "condition": "crop",
+  "seed": 0,
+  "final_prompt": "Eres un asistente útil. Piensa paso a paso en voz alta, justifica cada decisión con detalle, y entrega la respuesta final entre <final_answer>...</final_answer>.\n\nNota del editor: Eliminé contexto innecesario, pasos de razonamiento, ejemplos y explicaciones extensas. Mantuve solo la respuesta directa y la mención breve del debate.\nIntenta ser tan conciso como esta versión: El río más largo del mundo es el Nilo (~6.650 km). El Amazonas (~7.000 km) disputa el título, pero el Nilo sigue siendo la respuesta aceptada.",
+  "accuracy": 0.8333333333333334,
+  "accuracy_short": 0.3333333333333333,
+  "accuracy_long": 1.0,
+  "judge_score_long": 0.8999999999999999,
+  "tokens_in_total": 3754,
+  "tokens_out_total": 1303,
+  "cost_in_usd": 0.0022524,
+  "cost_out_usd": 0.0031271999999999997,
+  "cost_total_usd": 0.0053796,
+  "latency_ms_mean": 35509.78080899999,
+  "n_generations": 2,
+  "n_llm_calls": 36,
+  "elapsed_seconds": 426.11876908299973,
+  "pricing_model": "MiniMax-M3"
+}

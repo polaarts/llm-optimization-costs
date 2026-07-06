@@ -1,0 +1,8 @@
+metric,comparison,n_seeds,wilcoxon_statistic,wilcoxon_pvalue,cohens_d,unified_mean,other_mean,ci_high
+accuracy,unified vs baseline,5,2.0,0.5637028616507731,-0.09081532183729964,0.5666666666666667,0.5833333333333333,
+accuracy,unified vs capo,5,0.0,0.06788915486182899,2.3914261265861674,0.5666666666666667,0.1833333333333333,
+accuracy,unified vs crop,5,0.0,0.10880943004054569,-0.47404546313997736,0.5666666666666667,0.65,
+accuracy,unified (bootstrap CI),5,,,,0.5666666666666667,0.4166666666666667,0.7170833333333311
+tokens_in_total,unified (bootstrap CI),5,,,,2702.6,2641.595,2815.2
+tokens_out_total,unified (bootstrap CI),5,,,,2120.0,1269.8,3146.2
+cost_total_usd,unified (bootstrap CI),5,,,,0.00670955999999998,0.00473664,0.00914267999999998

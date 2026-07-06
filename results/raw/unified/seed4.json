@@ -1,0 +1,19 @@
+{
+  "condition": "unified",
+  "seed": 4,
+  "final_prompt": "Responde la siguiente pregunta de la forma más precisa posible. Cuando aplique, entrega la respuesta final entre <final_answer>...</final_answer>.",
+  "accuracy": 0.3333333333333333,
+  "accuracy_short": 0.0,
+  "accuracy_long": 1.0,
+  "judge_score_long": 0.9750000000000001,
+  "tokens_in_total": 2649,
+  "tokens_out_total": 1811,
+  "cost_in_usd": 0.0015894,
+  "cost_out_usd": 0.004346399999999999,
+  "cost_total_usd": 0.0059358,
+  "latency_ms_mean": 36548.60726733333,
+  "n_generations": 2,
+  "n_llm_calls": 36,
+  "elapsed_seconds": 438.5839850420007,
+  "pricing_model": "MiniMax-M3"
+}
