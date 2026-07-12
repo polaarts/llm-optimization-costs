@@ -15,6 +15,9 @@ tiktoken>=0.5,<1.0
 # Visualisation
 matplotlib>=3.8,<4.0
 
+# Fuzzy string matching (scorer SHORT)
+rapidfuzz>=3.6,<4.0
+
 # Tests
 pytest>=7.4,<9.0
 pytest-mock>=3.12,<4.0
