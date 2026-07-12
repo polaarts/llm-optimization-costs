@@ -24,6 +24,15 @@ from typing import Iterable, Optional, Sequence
 from .llm_client import LLMClient
 from .utils.logging import get_logger
 
+try:
+    # rapidfuzz provides fast, C-backed Levenshtein ratios. Required by the
+    # iteration-2 scorer to recognise short answers that the model wraps in a
+    # verbose explanation (e.g. "El cuerpo humano adulto tiene 206 huesos" for
+    # the expected answer "206").
+    from rapidfuzz import fuzz as _rf_fuzz  # type: ignore
+except ImportError:  # pragma: no cover - exercised only when missing dep
+    _rf_fuzz = None
+
 # ---------------------------------------------------------------------------
 # Answer extraction
 # ---------------------------------------------------------------------------
@@ -50,6 +59,33 @@ def _normalise(text: str) -> str:
     return re.sub(r"\s+", " ", no_accents.lower()).strip()
 
 
+def _fuzzy_short_score(prediction: str, expected: str) -> float:
+    """Levenshtein-style ratio between normalised prediction and expected.
+
+    Uses ``rapidfuzz.fuzz.token_set_ratio`` because short answers often appear
+    inside verbose model outputs (e.g. expected ``"206"`` appears verbatim
+    inside ``"El cuerpo humano adulto tiene 206 huesos"``). Character-level
+    ratios penalise the extra words heavily; token-set ratio compares the
+    intersection of token sets and is robust to extra surrounding tokens.
+
+    Returns a score in [0, 1]. Falls back to ``difflib.SequenceMatcher.ratio``
+    when rapidfuzz is not installed so the scorer stays usable in minimal
+    environments (the stdlib path is slower but functionally equivalent on
+    small strings).
+    """
+    a = _normalise(prediction)
+    b = _normalise(expected)
+    if not a or not b:
+        return 0.0
+    if _rf_fuzz is not None:
+        return float(_rf_fuzz.token_set_ratio(a, b)) / 100.0
+    # Stdlib fallback: SequenceMatcher.ratio returns the same [0, 1] range.
+    # It is character-based and therefore stricter than token_set_ratio, but
+    # it provides a usable answer when rapidfuzz is unavailable.
+    import difflib
+    return float(difflib.SequenceMatcher(None, a, b).ratio())
+
+
 # ---------------------------------------------------------------------------
 # Data structures
 # ---------------------------------------------------------------------------
@@ -65,6 +101,7 @@ class EvaluationRow:
     extracted: str
     correct: bool
     judge_score: Optional[float] = None  # 0..1, only populated for long rows
+    fuzzy_score: Optional[float] = None  # 0..1, only populated for short rows
     tokens_in: int = 0
     tokens_out: int = 0
 
@@ -76,6 +113,7 @@ class CandidateScore:
     accuracy: float
     accuracy_short: float
     accuracy_long: float
+    fuzzy_short_accuracy: float  # mean fuzzy_score over short rows (0..1)
     judge_score_long: float
     n: int
     n_short: int
@@ -92,6 +130,7 @@ class CandidateScore:
             "accuracy": self.accuracy,
             "accuracy_short": self.accuracy_short,
             "accuracy_long": self.accuracy_long,
+            "fuzzy_short_accuracy": self.fuzzy_short_accuracy,
             "judge_score_long": self.judge_score_long,
             "n": self.n,
             "n_short": self.n_short,
@@ -185,6 +224,7 @@ class MultiObjectiveScorer:
         max_input_tokens_baseline: float = 600.0,
         max_output_tokens_baseline: float = 200.0,
         use_judge: bool = True,
+        fuzzy_threshold: float = 0.85,
         client: Optional[LLMClient] = None,
     ) -> None:
         self.alpha = alpha
@@ -192,13 +232,23 @@ class MultiObjectiveScorer:
         self.max_input_tokens_baseline = max_input_tokens_baseline
         self.max_output_tokens_baseline = max_output_tokens_baseline
         self.use_judge = use_judge
+        self.fuzzy_threshold = fuzzy_threshold
         self.client = client or LLMClient()
 
     # ------------------------------------------------------------------
     # Single-row evaluation
     # ------------------------------------------------------------------
-    def _is_short_correct(self, prediction: str, expected: str) -> bool:
-        return _normalise(prediction) == _normalise(expected)
+    def _is_short_correct(self, prediction: str, expected: str) -> tuple[bool, float]:
+        """Decide whether a short answer is correct using the fuzzy scorer.
+
+        Returns ``(correct, fuzzy_score)`` where ``fuzzy_score`` is the raw
+        continuous similarity in [0, 1] (always populated for short rows). The
+        binary ``correct`` flag is derived from the configured threshold so the
+        caller can keep using boolean correctness in the racing loop while
+        still surfacing the continuous score in the analysis layer.
+        """
+        score = _fuzzy_short_score(prediction, expected)
+        return score >= self.fuzzy_threshold, score
 
     def _judge_long(self, question: str, response: str, reference: str) -> float:
         if not self.use_judge:
@@ -228,7 +278,7 @@ class MultiObjectiveScorer:
         # Decide whether the row is "short" or "long" based on the expected answer.
         is_short = len(_normalise(row["expected_short"]).split()) <= 5
         if is_short:
-            correct = self._is_short_correct(extracted, row["expected_short"])
+            correct, fuzzy_score = self._is_short_correct(extracted, row["expected_short"])
             return EvaluationRow(
                 id=row["id"],
                 question=row["question"],
@@ -238,6 +288,7 @@ class MultiObjectiveScorer:
                 extracted=extracted,
                 correct=correct,
                 judge_score=None,
+                fuzzy_score=fuzzy_score,
                 tokens_in=tokens_in,
                 tokens_out=tokens_out,
             )
@@ -253,6 +304,7 @@ class MultiObjectiveScorer:
             extracted=extracted,
             correct=judge >= 0.5,
             judge_score=judge,
+            fuzzy_score=None,
             tokens_in=tokens_in,
             tokens_out=tokens_out,
         )
@@ -267,7 +319,8 @@ class MultiObjectiveScorer:
         if n == 0:
             return CandidateScore(
                 accuracy=0.0, accuracy_short=0.0, accuracy_long=0.0,
-                judge_score_long=0.0, n=0, n_short=0, n_long=0,
+                fuzzy_short_accuracy=0.0, judge_score_long=0.0,
+                n=0, n_short=0, n_long=0,
                 tokens_in_total=0, tokens_out_total=0,
                 tokens_in_mean=0.0, tokens_out_mean=0.0, score=0.0,
                 rows=[],
@@ -280,6 +333,10 @@ class MultiObjectiveScorer:
         acc_long = (
             sum(1 for r in rows if r.judge_score is not None and r.correct) / n_long
             if n_long else 0.0
+        )
+        fuzzy_short = (
+            sum(r.fuzzy_score or 0.0 for r in rows if r.judge_score is None) / n_short
+            if n_short else 0.0
         )
         judge_long = (
             sum(r.judge_score or 0.0 for r in rows if r.judge_score is not None) / n_long
@@ -296,6 +353,7 @@ class MultiObjectiveScorer:
             accuracy=accuracy,
             accuracy_short=acc_short,
             accuracy_long=acc_long,
+            fuzzy_short_accuracy=fuzzy_short,
             judge_score_long=judge_long,
             n=n,
             n_short=n_short,

@@ -459,16 +459,1082 @@ _LONG_ROWS: list[dict[str, Any]] = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# Extension rows (Iteration 2, §8.2 of reports/informe.md).
+# Hand-authored to push the dataset above the 200-example threshold that the
+# Wilcoxon analysis needs for reasonable power. Difficulty distribution
+# rebalanced: SHORT_EXTRA skews 50/35/15 (easy/medium/hard) and LONG_EXTRA
+# skews 35/45/20 so the `hard` bucket gets meaningful representation.
+# ---------------------------------------------------------------------------
+_SHORT_ROWS_EXTRA: list[dict[str, Any]] = [
+    # --- easy (40) ---
+    {"id": "s31", "question": "¿Cuál es el color del cielo en un día despejado?", "expected_short": "Azul", "difficulty": "easy"},
+    {"id": "s32", "question": "¿Cuántos días tiene una semana?", "expected_short": "7", "difficulty": "easy"},
+    {"id": "s33", "question": "¿Cuál es el animal que pone huevos y da leche?", "expected_short": "Gallina", "difficulty": "easy"},
+    {"id": "s34", "question": "¿En qué continente está Brasil?", "expected_short": "América del Sur", "difficulty": "easy"},
+    {"id": "s35", "question": "¿Cuántas patas tiene una araña?", "expected_short": "8", "difficulty": "easy"},
+    {"id": "s36", "question": "¿Cuál es la moneda de México?", "expected_short": "Peso mexicano", "difficulty": "easy"},
+    {"id": "s37", "question": "¿Quién escribió 'Romeo y Julieta'?", "expected_short": "Shakespeare", "difficulty": "easy"},
+    {"id": "s38", "question": "¿Cuál es el mes más corto del año?", "expected_short": "Febrero", "difficulty": "easy"},
+    {"id": "s39", "question": "¿Cuántas sílabas tiene la palabra 'murciélago'?", "expected_short": "5", "difficulty": "easy"},
+    {"id": "s40", "question": "¿Cuál es el símbolo químico del agua?", "expected_short": "H2O", "difficulty": "easy"},
+    {"id": "s41", "question": "¿Quién descubrió América?", "expected_short": "Cristóbal Colón", "difficulty": "easy"},
+    {"id": "s42", "question": "¿En qué país está la Torre Eiffel?", "expected_short": "Francia", "difficulty": "easy"},
+    {"id": "s43", "question": "¿Cuántos minutos tiene una hora?", "expected_short": "60", "difficulty": "easy"},
+    {"id": "s44", "question": "¿Cuál es el órgano más grande del cuerpo humano?", "expected_short": "Piel", "difficulty": "easy"},
+    {"id": "s45", "question": "¿Cómo se llama el satélite natural de la Tierra?", "expected_short": "Luna", "difficulty": "easy"},
+    {"id": "s46", "question": "¿Cuál es el metal más conductor de electricidad?", "expected_short": "Plata", "difficulty": "easy"},
+    {"id": "s47", "question": "¿Cuántas teclas tiene un piano estándar?", "expected_short": "88", "difficulty": "easy"},
+    {"id": "s48", "question": "¿Cuál es el océano más pequeño?", "expected_short": "Ártico", "difficulty": "easy"},
+    {"id": "s49", "question": "¿En qué año terminó la Segunda Guerra Mundial?", "expected_short": "1945", "difficulty": "easy"},
+    {"id": "s50", "question": "¿Cuál es la capital de España?", "expected_short": "Madrid", "difficulty": "easy"},
+    {"id": "s51", "question": "¿Cuántas vocales tiene el alfabeto español?", "expected_short": "5", "difficulty": "easy"},
+    {"id": "s52", "question": "¿Quién pintó 'La última cena'?", "expected_short": "Leonardo da Vinci", "difficulty": "easy"},
+    {"id": "s53", "question": "¿Cuál es la velocidad de la luz en km/s?", "expected_short": "300000", "difficulty": "easy"},
+    {"id": "s54", "question": "¿En qué país nació Einstein?", "expected_short": "Alemania", "difficulty": "easy"},
+    {"id": "s55", "question": "¿Cuántos dientes tiene un adulto humano?", "expected_short": "32", "difficulty": "easy"},
+    {"id": "s56", "question": "¿Cuál es el ave más grande del mundo?", "expected_short": "Avestruz", "difficulty": "easy"},
+    {"id": "s57", "question": "¿Cuál es el río más caudaloso del mundo?", "expected_short": "Amazonas", "difficulty": "easy"},
+    {"id": "s58", "question": "¿En qué mes comienza el invierno en el hemisferio sur?", "expected_short": "Junio", "difficulty": "easy"},
+    {"id": "s59", "question": "¿Cuál es el único mamífero que puede volar?", "expected_short": "Murciélago", "difficulty": "easy"},
+    {"id": "s60", "question": "¿Cuántos lados tiene un triángulo?", "expected_short": "3", "difficulty": "easy"},
+    {"id": "s61", "question": "¿Cuál es la fórmula del dióxido de carbono?", "expected_short": "CO2", "difficulty": "easy"},
+    {"id": "s62", "question": "¿Quién fue el primer hombre en pisar la Luna?", "expected_short": "Neil Armstrong", "difficulty": "easy"},
+    {"id": "s63", "question": "¿Cuál es el símbolo químico del hierro?", "expected_short": "Fe", "difficulty": "easy"},
+    {"id": "s64", "question": "¿En qué país está el desierto del Sahara?", "expected_short": "África", "difficulty": "easy"},
+    {"id": "s65", "question": "¿Cuántos huesos tiene la mano humana?", "expected_short": "27", "difficulty": "easy"},
+    {"id": "s66", "question": "¿Cuál es el deporte más popular del mundo?", "expected_short": "Fútbol", "difficulty": "easy"},
+    {"id": "s67", "question": "¿En qué año se firmó la Declaración de Independencia de EE.UU.?", "expected_short": "1776", "difficulty": "easy"},
+    {"id": "s68", "question": "¿Cuál es la moneda del Reino Unido?", "expected_short": "Libra esterlina", "difficulty": "easy"},
+    {"id": "s69", "question": "¿Cómo se llama el gas que respiramos?", "expected_short": "Oxígeno", "difficulty": "easy"},
+    {"id": "s70", "question": "¿Cuál es el planeta más grande del sistema solar?", "expected_short": "Júpiter", "difficulty": "easy"},
+    # --- medium (28) ---
+    {"id": "s71", "question": "¿En qué año cayó el Imperio Romano de Occidente?", "expected_short": "476", "difficulty": "medium"},
+    {"id": "s72", "question": "¿Quién escribió 'Crimen y castigo'?", "expected_short": "Dostoyevski", "difficulty": "medium"},
+    {"id": "s73", "question": "¿Cuál es la montaña más alta de América?", "expected_short": "Aconcagua", "difficulty": "medium"},
+    {"id": "s74", "question": "¿En qué año se descubrió la penicilina?", "expected_short": "1928", "difficulty": "medium"},
+    {"id": "s75", "question": "¿Cuál es el símbolo químico del mercurio?", "expected_short": "Hg", "difficulty": "medium"},
+    {"id": "s76", "question": "¿Quién compuso la Novena Sinfonía?", "expected_short": "Beethoven", "difficulty": "medium"},
+    {"id": "s77", "question": "¿En qué país se encuentra Machu Picchu?", "expected_short": "Perú", "difficulty": "medium"},
+    {"id": "s78", "question": "¿Cuál es la lengua más hablada de Europa?", "expected_short": "Inglés", "difficulty": "medium"},
+    {"id": "s79", "question": "¿Cuál es el mamífero más grande del mundo?", "expected_short": "Ballena azul", "difficulty": "medium"},
+    {"id": "s80", "question": "¿Quién fue el primer presidente de México?", "expected_short": "Guadalupe Victoria", "difficulty": "medium"},
+    {"id": "s81", "question": "¿Cuál es el país con más población del mundo?", "expected_short": "India", "difficulty": "medium"},
+    {"id": "s82", "question": "¿En qué año se fundó la ONU?", "expected_short": "1945", "difficulty": "medium"},
+    {"id": "s83", "question": "¿Cuál es el hueso más pequeño del cuerpo humano?", "expected_short": "Estribo", "difficulty": "medium"},
+    {"id": "s84", "question": "¿Quién pintó 'El Guernica'?", "expected_short": "Picasso", "difficulty": "medium"},
+    {"id": "s85", "question": "¿Cuál es la moneda de Argentina?", "expected_short": "Peso argentino", "difficulty": "medium"},
+    {"id": "s86", "question": "¿En qué país se encuentra el Kremlin?", "expected_short": "Rusia", "difficulty": "medium"},
+    {"id": "s87", "question": "¿Cuál es el proceso por el cual las plantas producen su alimento?", "expected_short": "Fotosíntesis", "difficulty": "medium"},
+    {"id": "s88", "question": "¿Quién fue el último emperador de China?", "expected_short": "Puyi", "difficulty": "medium"},
+    {"id": "s89", "question": "¿Cuál es la capital de Australia?", "expected_short": "Canberra", "difficulty": "medium"},
+    {"id": "s90", "question": "¿En qué año se inauguró el Canal de Panamá?", "expected_short": "1914", "difficulty": "medium"},
+    {"id": "s91", "question": "¿Cuál es el río más largo de Europa?", "expected_short": "Volga", "difficulty": "medium"},
+    {"id": "s92", "question": "¿Quién escribió 'La Odisea'?", "expected_short": "Homero", "difficulty": "medium"},
+    {"id": "s93", "question": "¿Cuál es el ácido que se encuentra en el vinagre?", "expected_short": "Ácido acético", "difficulty": "medium"},
+    {"id": "s94", "question": "¿En qué país se inventó la imprenta moderna?", "expected_short": "Alemania", "difficulty": "medium"},
+    {"id": "s95", "question": "¿Cuál es el desierto más grande del mundo?", "expected_short": "Sahara", "difficulty": "medium"},
+    {"id": "s96", "question": "¿Quién escribió 'Rayuela'?", "expected_short": "Cortázar", "difficulty": "medium"},
+    {"id": "s97", "question": "¿Cuál es el símbolo del elemento químico potasio?", "expected_short": "K", "difficulty": "medium"},
+    {"id": "s98", "question": "¿En qué año se proclamó la independencia de Argentina?", "expected_short": "1816", "difficulty": "medium"},
+    # --- hard (12) ---
+    {"id": "s99", "question": "¿Cuál es la constante de Planck en J·s (valor redondeado)?", "expected_short": "6.626e-34", "difficulty": "hard"},
+    {"id": "s100", "question": "¿Cuál es la primera derivada de x^n?", "expected_short": "n*x^(n-1)", "difficulty": "hard"},
+    {"id": "s101", "question": "¿En qué año Turing publicó 'On Computable Numbers'?", "expected_short": "1936", "difficulty": "hard"},
+    {"id": "s102", "question": "¿Cuál es el orden del grupo de Galois de un polinomio irreducible de grado 5?", "expected_short": "120", "difficulty": "hard"},
+    {"id": "s103", "question": "¿Qué número primo sigue a 97?", "expected_short": "101", "difficulty": "hard"},
+    {"id": "s104", "question": "¿Cuál es el pKa del ácido acético en agua a 25°C?", "expected_short": "4.76", "difficulty": "hard"},
+    {"id": "s105", "question": "¿Cómo se llama la partícula mediadora de la fuerza nuclear fuerte?", "expected_short": "Gluón", "difficulty": "hard"},
+    {"id": "s106", "question": "¿Cuál es la temperatura de ebullición del nitrógeno líquido en °C?", "expected_short": "-196", "difficulty": "hard"},
+    {"id": "s107", "question": "¿En qué año se publicó el teorema de incompletitud de Gödel?", "expected_short": "1931", "difficulty": "hard"},
+    {"id": "s108", "question": "¿Cuál es el isómero del butano con punto de ebullición más bajo?", "expected_short": "Isobutano", "difficulty": "hard"},
+    {"id": "s109", "question": "¿Cuántos bits tiene una dirección IPv4?", "expected_short": "32", "difficulty": "hard"},
+    {"id": "s110", "question": "¿Cómo se llama el principio que establece que dos electrones no pueden tener los mismos números cuánticos?", "expected_short": "Exclusión de Pauli", "difficulty": "hard"},
+]
+
+
+_LONG_ROWS_EXTRA: list[dict[str, Any]] = [
+    # --- easy (28) ---
+    {
+        "id": "l34",
+        "question": "Explica brevemente qué hace un motor de búsqueda.",
+        "expected_long": (
+            "Un motor de búsqueda es un sistema que indexa páginas web y responde a consultas de los "
+            "usuarios con una lista de resultados relevantes ordenados por relevancia. Para hacerlo "
+            "recorre la web con rastreadores, almacena los documentos en un índice invertido y aplica "
+            "algoritmos de ranking (como PageRank) para devolver los mejores resultados en milisegundos."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l35",
+        "question": "¿Qué es el clima y en qué se diferencia del tiempo meteorológico?",
+        "expected_long": (
+            "El clima es el patrón promedio de las condiciones atmosféricas en una región a lo largo "
+            "de períodos largos (décadas), mientras que el tiempo meteorológico describe las "
+            "condiciones atmosféricas en un momento y lugar concretos. El clima se estudia con "
+            "estadísticas de muchos años; el tiempo se mide a diario con termómetros y pluviómetros."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l36",
+        "question": "Explica qué es un volcán.",
+        "expected_long": (
+            "Un volcán es una abertura en la corteza terrestre por la que emergen magma, gases y "
+            "ceniza desde el interior del planeta. El magma que alcanza la superficie se llama lava y, "
+            "al enfriarse, forma rocas ígneas. Los volcanes se forman en los límites de placas "
+            "tectónicas o sobre puntos calientes del manto terrestre."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l37",
+        "question": "¿Qué es un correo electrónico y cómo funciona en términos generales?",
+        "expected_long": (
+            "El correo electrónico es un sistema de mensajería digital que permite enviar y recibir "
+            "mensajes a través de Internet. Cuando un usuario envía un correo, el mensaje viaja "
+            "desde su cliente de correo a un servidor SMTP, que lo enruta al servidor del destinatario "
+            "usando protocolos como POP3 o IMAP, y finalmente lo entrega al cliente del receptor."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l38",
+        "question": "Describe brevemente qué es un mapa y para qué sirve.",
+        "expected_long": (
+            "Un mapa es una representación visual y a escala de una porción de la superficie "
+            "terrestre o de otro espacio. Sirve para orientarse, planificar rutas, analizar "
+            "territorios y comunicar información geográfica. Los mapas pueden ser físicos (en papel) "
+            "o digitales (como los que se usan en aplicaciones de navegación GPS)."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l39",
+        "question": "¿Qué es un antibiótico y cómo actúa?",
+        "expected_long": (
+            "Un antibiótico es un medicamento que mata o impide el crecimiento de bacterias. Actúa "
+            "bloqueando procesos esenciales para la bacteria, como la síntesis de la pared celular, "
+            "la replicación del ADN o la producción de proteínas. Los antibióticos no son efectivos "
+            "contra virus, por lo que no deben usarse para tratar infecciones virales como la gripe."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l40",
+        "question": "Explica brevemente qué es un átomo.",
+        "expected_long": (
+            "Un átomo es la unidad más pequeña de un elemento químico que mantiene sus propiedades. "
+            "Está formado por un núcleo con protones y neutrones, rodeado por una nube de electrones. "
+            "Los átomos se combinan entre sí mediante enlaces químicos para formar moléculas y "
+            "compuestos."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l41",
+        "question": "¿Qué es un idioma y por qué hay tantos en el mundo?",
+        "expected_long": (
+            "Un idioma es un sistema de comunicación con vocabulario y gramática propios que usan las "
+            "comunidades humanas para expresarse. La diversidad lingüística surge de procesos "
+            "históricos: separaciones geográficas, conquistas, migraciones y evolución cultural. "
+            "Se estima que existen más de 7.000 idiomas vivos, aunque algunos están en peligro de "
+            "extinción."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l42",
+        "question": "Describe qué es una receta de cocina y qué partes suele tener.",
+        "expected_long": (
+            "Una receta de cocina es una guía estructurada para preparar un plato específico. Suele "
+            "tener tres partes: el título y la descripción, la lista de ingredientes con cantidades, "
+            "y los pasos de preparación en orden cronológico. Algunas recetas añaden tiempos de "
+            "cocción, porciones, nivel de dificultad y sugerencias de presentación."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l43",
+        "question": "¿Qué es un sistema solar?",
+        "expected_long": (
+            "Un sistema solar es un conjunto de cuerpos celestes que orbitan alrededor de una "
+            "estrella. El Sistema Solar que habitamos incluye una estrella central (el Sol), ocho "
+            "planetas principales, planetas enanos como Plutón, satélites naturales, asteroides, "
+            "cometas y polvo cósmico, todos vinculados gravitacionalmente al Sol."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l44",
+        "question": "Explica qué es un calendario y por qué fue importante históricamente.",
+        "expected_long": (
+            "Un calendario es un sistema para contar y organizar el tiempo en días, semanas, meses y "
+            "años. Su desarrollo fue crucial para la agricultura, la planificación religiosa, la "
+            "recaudación de impuestos y la coordinación social. Los más antiguos se basaban en ciclos "
+            "lunares, mientras que el calendario gregoriano, vigente hoy, se basa en el ciclo solar."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l45",
+        "question": "¿Qué es un terremoto y por qué ocurre?",
+        "expected_long": (
+            "Un terremoto es una vibración brusca de la corteza terrestre causada por la liberación "
+            "de energía acumulada en las fallas geológicas. Ocurre cuando las placas tectónicas se "
+            "mueven y la tensión acumulada supera la resistencia de las rocas, generando ondas "
+            "sísmicas que se propagan desde el hipocentro hasta la superficie."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l46",
+        "question": "Explica brevemente qué es una biblioteca.",
+        "expected_long": (
+            "Una biblioteca es una institución que reúne, organiza y preserva libros, documentos y "
+            "otros materiales para su consulta y préstamo. Las bibliotecas modernas también ofrecen "
+            "recursos digitales como libros electrónicos, bases de datos y acceso a Internet, "
+            "desempeñando un papel clave en la educación y la cultura."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l47",
+        "question": "¿Qué es una receta médica?",
+        "expected_long": (
+            "Una receta médica es un documento emitido por un profesional de la salud que autoriza "
+            "la dispensación de un medicamento o tratamiento. Incluye el nombre del paciente, el "
+            "fármaco, la dosis, la frecuencia y la duración del tratamiento, además de la firma del "
+            "médico y su número de colegiatura. Es esencial para asegurar un uso seguro de los "
+            "medicamentos."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l48",
+        "question": "Explica qué es una contraseña segura y por qué es importante.",
+        "expected_long": (
+            "Una contraseña segura es una cadena de caracteres larga, aleatoria y única que protege "
+            "el acceso a cuentas y sistemas. Combina letras mayúsculas y minúsculas, números y "
+            "símbolos, evitando palabras del diccionario o datos personales. Es importante porque "
+            "una contraseña débil facilita ataques de fuerza bruta o de diccionario, comprometiendo "
+            "la privacidad y la seguridad del usuario."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l49",
+        "question": "¿Qué es un navegador web y cuáles son los más usados?",
+        "expected_long": (
+            "Un navegador web es una aplicación que permite visualizar páginas web en Internet "
+            "interpretando HTML, CSS y JavaScript. Los más usados a nivel mundial son Google Chrome, "
+            "Safari, Microsoft Edge, Mozilla Firefox y Opera. Cada navegador ofrece su propio motor "
+            "de renderizado y admite extensiones que amplían su funcionalidad."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l50",
+        "question": "Describe brevemente qué es un banco y cuál es su función principal.",
+        "expected_long": (
+            "Un banco es una institución financiera que acepta depósitos, otorga préstamos y ofrece "
+            "servicios de pago y custodia de valores. Su función principal es intermediar entre "
+            "quienes tienen dinero y quienes lo necesitan, cobrando un interés a los prestatarios y "
+            "pagando uno menor a los depositantes, además de garantizar la seguridad del sistema de "
+            "pagos."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l51",
+        "question": "¿Qué es la gravedad?",
+        "expected_long": (
+            "La gravedad es la fuerza de atracción que ejercen entre sí los objetos con masa. En la "
+            "Tierra nos mantiene pegados al suelo y mantiene la Luna en órbita. Newton describió la "
+            "gravedad como una fuerza proporcional al producto de las masas e inversamente "
+            "proporcional al cuadrado de la distancia; Einstein la reinterpretó como una curvatura "
+            "del espacio-tiempo."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l52",
+        "question": "Explica qué es un instrumento musical y pon dos ejemplos.",
+        "expected_long": (
+            "Un instrumento musical es un objeto o dispositivo diseñado para producir sonido con "
+            "finalidad artística. Se clasifican en cuerda (guitarra, violín), viento (flauta, "
+            "trombón), percusión (tambor, piano — que combina cuerda y percusión) y electrónicos "
+            "(sintetizador). Cada familia produce el sonido mediante un mecanismo físico distinto."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l53",
+        "question": "¿Qué es una moneda y por qué los países adoptan una propia?",
+        "expected_long": (
+            "Una moneda es un medio de intercambio aceptado dentro de un territorio. Los países "
+            "adoptan una moneda propia para facilitar el comercio interno, controlar la política "
+            "monetaria y reforzar la identidad nacional. Algunos, como los países de la zona euro, "
+            "optan por compartir una moneda común para simplificar transacciones transfronterizas."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l54",
+        "question": "¿Qué es una oración y qué elementos principales la componen?",
+        "expected_long": (
+            "Una oración es una unidad gramatical con sentido completo que se compone al menos de un "
+            "sujeto y un predicado. El sujeto es quien realiza la acción; el predicado expresa esa "
+            "acción o estado mediante un verbo, y puede incluir complementos (directo, indirecto, "
+            "circunstancial). Las oraciones se clasifican según la intención del hablante en "
+            "enunciativas, interrogativas, exclamativas, imperativas, desiderativas y dubitativas."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l55",
+        "question": "Explica qué es un hospital y qué tipos de atención ofrece.",
+        "expected_long": (
+            "Un hospital es un centro de salud donde se brinda atención médica especializada. Ofrece "
+            "servicios de urgencias, hospitalización, cirugías, consultas externas, diagnóstico por "
+            "imagen y laboratorio. Puede ser público, privado o mixto, y dispone de profesionales "
+            "como médicos, enfermeros, técnicos y administrativos organizados por servicios."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l56",
+        "question": "¿Qué es un jardín botánico?",
+        "expected_long": (
+            "Un jardín botánico es una institución que conserva, investiga y exhibe colecciones "
+            "vegetales vivas con fines científicos, educativos y recreativos. Mantiene bancos de "
+            "semillas, participa en programas de conservación de especies amenazadas y documenta la "
+            "biodiversidad. Algunos jardines botánicos famosos son Kew Gardens, el Jardín Botánico "
+            "de Nueva York y el Real Jardín Botánico de Madrid."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l57",
+        "question": "Explica brevemente qué es una ley en sentido jurídico.",
+        "expected_long": (
+            "Una ley, en sentido jurídico, es una norma escrita emanada del poder legislativo que "
+            "regula la conducta de los miembros de una sociedad y es obligatoria para todos. Para "
+            "ser válida debe seguir un proceso de aprobación议会 y publicarse oficialmente. Las leyes "
+            "tienen jerarquía sobre los reglamentos y están subordinadas a la constitución."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l58",
+        "question": "¿Qué es un planeta enano y por qué Plutón dejó de ser planeta?",
+        "expected_long": (
+            "Un planeta enano es un cuerpo celeste que orbita alrededor del Sol y tiene suficiente "
+            "masa para tener forma esférica, pero que no ha limpiado su órbita de otros objetos. "
+            "Plutón fue reclasificado como planeta enano en 2006 por la Unión Astronómica "
+            "Internacional porque comparte su órbita con otros cuerpos del cinturón de Kuiper."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l59",
+        "question": "Explica brevemente qué es un supermercado y qué productos ofrece.",
+        "expected_long": (
+            "Un supermercado es una tienda de autoservicio de gran tamaño que vende alimentos, "
+            "productos de limpieza, higiene personal y artículos para el hogar. Los clientes toman "
+            "los productos de los estantes, los llevan en un carrito y pagan en cajas. Algunos "
+            "supermercados también ofrecen secciones de carnicería, pescadería, panadería y "
+            "productos frescos."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l60",
+        "question": "¿Qué es un insecto y qué características tiene?",
+        "expected_long": (
+            "Un insecto es un artrópodo del subphylum Hexapoda, caracterizado por tener tres pares "
+            "de patas, cuerpo dividido en tres segmentos (cabeza, tórax y abdomen), un par de "
+            "antenas y, generalmente, dos pares de alas. Son el grupo animal más diverso del "
+            "planeta, con más de un millón de especies descritas que ocupan prácticamente todos los "
+            "ecosistemas terrestres."
+        ),
+        "difficulty": "easy",
+    },
+    {
+        "id": "l61",
+        "question": "Explica qué es una escuela y qué niveles educativos suele tener.",
+        "expected_long": (
+            "Una escuela es una institución dedicada a la enseñanza formal de conocimientos y "
+            "habilidades. Suele organizar la educación en niveles: inicial o preescolar, primaria "
+            "(o básica), secundaria y, en algunos casos, preparatoria o bachillerato. Las escuelas "
+            "pueden ser públicas o privadas y adaptarse a diferentes metodologías pedagógicas."
+        ),
+        "difficulty": "easy",
+    },
+    # --- medium (36) ---
+    {
+        "id": "l62",
+        "question": "Explica brevemente qué es un sistema de archivos y para qué sirve.",
+        "expected_long": (
+            "Un sistema de archivos es la estructura que un sistema operativo utiliza para organizar "
+            "y almacenar datos en dispositivos de almacenamiento. Define cómo se nombran, organizan y "
+            "acceden los archivos y directorios. Ejemplos comunes son NTFS, FAT32 y ext4, cada uno "
+            "con características distintas en cuanto a permisos, tamaño máximo de archivo y "
+            "tolerancia a fallos."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l63",
+        "question": "¿Qué es el aprendizaje supervisado y cómo se diferencia del no supervisado?",
+        "expected_long": (
+            "El aprendizaje supervisado entrena al modelo con ejemplos etiquetados (entradas con su "
+            "salida esperada), mientras que el no supervisado trabaja con datos sin etiquetas y "
+            "descubre patrones por sí mismo, como agrupamientos o asociaciones. El supervisado se "
+            "usa típicamente para clasificación y regresión, mientras que el no supervisado es útil "
+            "para clustering y reducción de dimensionalidad."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l64",
+        "question": "Explica brevemente qué es un compilador y cuáles son sus fases principales.",
+        "expected_long": (
+            "Un compilador traduce código fuente escrito en un lenguaje de programación a un "
+            "lenguaje que la máquina puede ejecutar. Sus fases principales son: análisis léxico, "
+            "análisis sintáctico, análisis semántico, generación de código intermedio, optimización "
+            "y generación de código final. Cada fase transforma la representación del programa y "
+            "puede informar de errores."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l65",
+        "question": "¿Qué es un ataque de inyección SQL y cómo se previene?",
+        "expected_long": (
+            "Un ataque de inyección SQL ocurre cuando un atacante introduce código SQL malicioso en "
+            "un campo de entrada que la aplicación concatena directamente en una consulta. Esto "
+            "puede permitir leer, modificar o eliminar datos. Se previene usando consultas "
+            "parametrizadas, validación de entradas y cuentas con privilegios mínimos."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l66",
+        "question": "Explica brevemente qué es un sistema de recomendación.",
+        "expected_long": (
+            "Un sistema de recomendación es un algoritmo que sugiere productos, contenidos o "
+            "servicios a un usuario en función de sus preferencias, historial o el comportamiento de "
+            "usuarios similares. Los más comunes son el filtrado colaborativo (basado en usuarios "
+            "parecidos), el filtrado basado en contenido (basado en características del ítem) y los "
+            "modelos híbridos que combinan ambos enfoques."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l67",
+        "question": "¿Qué es el ciclo de vida del software y cuáles son sus etapas?",
+        "expected_long": (
+            "El ciclo de vida del software describe las fases por las que pasa un sistema desde su "
+            "concepción hasta su retirada. Las etapas típicas son: análisis de requisitos, diseño, "
+            "implementación, pruebas, despliegue, mantenimiento y, finalmente, retirada. Modelos "
+            "como cascada, iterativo, ágil o DevOps organizan estas etapas de distinta forma según "
+            "el proyecto."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l68",
+        "question": "Explica brevemente qué es una base de datos NoSQL.",
+        "expected_long": (
+            "Una base de datos NoSQL es un sistema de almacenamiento que no sigue el modelo "
+            "relacional clásico, diseñado para manejar grandes volúmenes de datos no "
+            "estructurados o semiestructurados. Existen cuatro familias principales: clave-valor "
+            "(Redis), documental (MongoDB), columnar (Cassandra) y de grafos (Neo4j). Suelen "
+            "ofrecer mayor escalabilidad horizontal que las bases de datos relacionales."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l69",
+        "question": "¿Qué es una dirección MAC y en qué se diferencia de una IP?",
+        "expected_long": (
+            "Una dirección MAC es un identificador único de 48 bits asignado a la interfaz de red "
+            "de un dispositivo, utilizado en la capa de enlace para comunicaciones dentro de una "
+            "red local. Una dirección IP identifica al dispositivo en la capa de red y se usa para "
+            "el enrutamiento entre redes. La MAC es fija (asignada por el fabricante) y la IP puede "
+            "cambiar dinámicamente."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l70",
+        "question": "Explica brevemente qué es un servidor web.",
+        "expected_long": (
+            "Un servidor web es un programa que recibe peticiones HTTP de clientes (navegadores) y "
+            "responde con recursos, generalmente páginas HTML, imágenes o datos en JSON. Ejemplos "
+            "populares son Apache, Nginx e IIS. Además de servir archivos estáticos, muchos "
+            "servidores delegan el procesamiento dinámico a lenguajes como PHP, Python o Node.js."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l71",
+        "question": "¿Qué es el teorema de Pitágoras y para qué sirve?",
+        "expected_long": (
+            "El teorema de Pitágoras establece que en un triángulo rectángulo, el cuadrado de la "
+            "hipotenusa es igual a la suma de los cuadrados de los catetos: a² + b² = c². Sirve "
+            "para calcular longitudes desconocidas en triángulos rectángulos y es la base de la "
+            "trigonometría, con aplicaciones en ingeniería, arquitectura, navegación y gráficos por "
+            "computadora."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l72",
+        "question": "Explica brevemente qué es el cambio climático y cuáles son sus causas.",
+        "expected_long": (
+            "El cambio climático es la variación significativa y prolongada de los patrones "
+            "climáticos globales. Sus causas principales son antropogénicas: quema de combustibles "
+            "fósiles, deforestación, ganadería intensiva y procesos industriales que incrementan "
+            "los gases de efecto invernadero. También hay causas naturales como variaciones "
+            "solares y erupciones volcánicas, pero el efecto humano es el dominante desde la "
+            "revolución industrial."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l73",
+        "question": "¿Qué es la inteligencia artificial y cómo se relaciona con el aprendizaje automático?",
+        "expected_long": (
+            "La inteligencia artificial (IA) es el campo de la informática que busca crear sistemas "
+            "capaces de realizar tareas que requieren inteligencia humana. El aprendizaje "
+            "automático (machine learning) es una subdisciplina de la IA que permite a los sistemas "
+            "aprender patrones a partir de datos sin ser programados explícitamente. Gran parte de "
+            "los avances recientes en IA se sustentan en técnicas de aprendizaje automático, "
+            "especialmente el aprendizaje profundo."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l74",
+        "question": "Explica brevemente qué es una API.",
+        "expected_long": (
+            "Una API (Application Programming Interface) es un conjunto de reglas y definiciones "
+            "que permiten que dos aplicaciones se comuniquen entre sí. Especifica los endpoints, "
+            "los formatos de mensaje y los tipos de operaciones disponibles. Las APIs modernas "
+            "suelen usar HTTP y devuelven datos en JSON o XML, lo que facilita la integración entre "
+            "sistemas heterogéneos."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l75",
+        "question": "¿Qué es la herencia en programación orientada a objetos?",
+        "expected_long": (
+            "La herencia es un mecanismo de la programación orientada a objetos que permite crear "
+            "nuevas clases a partir de otras existentes, heredando sus atributos y métodos. La "
+            "clase derivada puede extender o sobrescribir el comportamiento heredado. Esto fomenta "
+            "la reutilización de código y modela relaciones 'es un' entre entidades, como "
+            "Vehículo → Coche."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l76",
+        "question": "Explica brevemente qué es una VPN y para qué se usa.",
+        "expected_long": (
+            "Una VPN (Virtual Private Network) es una tecnología que crea un túnel cifrado entre el "
+            "dispositivo del usuario y un servidor remoto, ocultando la dirección IP y protegiendo "
+            "los datos en tránsito. Se usa para acceder a redes corporativas desde fuera, "
+            "proteger la privacidad en redes Wi-Fi públicas y eludir restricciones geográficas. "
+            "Es importante elegir proveedores de confianza, ya que el tráfico pasa por sus "
+            "servidores."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l77",
+        "question": "¿Qué es el GDPR y a quién aplica?",
+        "expected_long": (
+            "El GDPR (Reglamento General de Protección de Datos) es una normativa de la Unión "
+            "Europea que regula el tratamiento de datos personales de los residentes europeos. "
+            "Aplica a cualquier organización, dentro o fuera de la UE, que procese datos de "
+            "ciudadanos europeos. Establece principios como la limitación de la finalidad, la "
+            "minimización de datos y derechos como acceso, rectificación, supresión y portabilidad."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l78",
+        "question": "Explica brevemente qué es un sistema de control de versiones.",
+        "expected_long": (
+            "Un sistema de control de versiones es una herramienta que registra los cambios en "
+            "archivos a lo largo del tiempo, permitiendo recuperar versiones anteriores, comparar "
+            "modificaciones y colaborar con otros desarrolladores. Git es el más usado actualmente, "
+            "y se complementa con plataformas como GitHub, GitLab o Bitbucket para alojar "
+            "repositorios remotos y facilitar la revisión de código."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l79",
+        "question": "¿Qué es la caché de un procesador y para qué sirve?",
+        "expected_long": (
+            "La caché de un procesador es una memoria pequeña y muy rápida ubicada cerca o dentro "
+            "de la CPU que almacena temporalmente datos e instrucciones usados frecuentemente. "
+            "Reduce el tiempo de acceso a memoria principal, que es mucho más lenta. Los "
+            "procesadores actuales tienen varios niveles (L1, L2 y L3) con compromisos entre "
+            "velocidad, capacidad y cercanía al núcleo."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l80",
+        "question": "Explica brevemente qué es el principio SOLID en ingeniería de software.",
+        "expected_long": (
+            "SOLID es un acrónimo de cinco principios de diseño orientado a objetos: Single "
+            "Responsibility (una clase, una razón para cambiar), Open/Closed (abierto a extensión, "
+            "cerrado a modificación), Liskov Substitution (las subclases deben sustituir a sus "
+            "clases base), Interface Segregation (interfaces pequeñas y específicas) y Dependency "
+            "Inversion (depender de abstracciones, no de concreciones). Aplicarlos produce código "
+            "más mantenible y testeable."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l81",
+        "question": "¿Qué es un sistema distribuido y cuáles son sus desafíos?",
+        "expected_long": (
+            "Un sistema distribuido es un conjunto de computadoras autónomas conectadas en red que "
+            "colaboran para ofrecer un servicio unificado. Sus desafíos típicos incluyen la "
+            "consistencia de los datos, la tolerancia a fallos, la sincronización entre nodos, la "
+            "escalabilidad y la seguridad. Ejemplos son las bases de datos distribuidas, las "
+            "blockchains y los sistemas de archivos como HDFS."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l82",
+        "question": "Explica brevemente qué es el método científico.",
+        "expected_long": (
+            "El método científico es un procedimiento sistemático para investigar fenómenos "
+            "naturales y validar conocimiento. Sus pasos típicos son: observación, formulación de "
+            "una hipótesis, diseño experimental, recolección de datos, análisis y conclusiones. "
+            "Si los resultados contradicen la hipótesis, se modifica y se repite el ciclo. La "
+            "reproducibilidad y la falsabilidad son pilares del método."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l83",
+        "question": "¿Qué es el Pagerank de Google y cómo funciona?",
+        "expected_long": (
+            "El PageRank es un algoritmo de Google que asigna una puntuación a cada página web en "
+            "función de los enlaces que recibe de otras páginas. Trata cada enlace como un voto de "
+            "relevancia y pondera los votos según la calidad de la página que enlaza. Hoy es uno "
+            "más entre los cientos de señales que Google usa para clasificar resultados, "
+            "combinado con señales de comportamiento y contenido."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l84",
+        "question": "Explica brevemente qué es un endpoint en una API REST.",
+        "expected_long": (
+            "Un endpoint en una API REST es una URL específica que representa un recurso o una "
+            "acción sobre ese recurso. Se accede a ellos mediante los métodos HTTP estándar: GET "
+            "para leer, POST para crear, PUT o PATCH para actualizar y DELETE para eliminar. "
+            "Ejemplos: GET /usuarios/123 devuelve el usuario con id 123, POST /usuarios crea uno "
+            "nuevo."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l85",
+        "question": "¿Qué es una blockchain y por qué se considera segura?",
+        "expected_long": (
+            "Una blockchain es un libro de cuentas digital distribuido donde las transacciones se "
+            "agrupan en bloques enlazados criptográficamente. Cada bloque contiene el hash del "
+            "anterior, formando una cadena inalterable. Se considera segura porque alterar un "
+            "bloque requeriría recomputar todas las pruebas siguientes y obtener el consenso de la "
+            "mayoría de la red, lo que es computacional y económicamente inviable en cadenas "
+            "grandes como Bitcoin."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l86",
+        "question": "Explica brevemente qué es un kernel en un sistema operativo.",
+        "expected_long": (
+            "El kernel es el núcleo de un sistema operativo: el programa que se ejecuta con "
+            "máximos privilegios y gestiona los recursos del hardware. Se encarga de planificar "
+            "procesos, administrar memoria, gestionar dispositivos y proporcionar la interfaz entre "
+            "el software de usuario y el hardware. Existen kernels monolíticos (Linux) y "
+            "microkernels (Minix), con compromisos diferentes entre rendimiento y modularidad."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l87",
+        "question": "¿Qué es el método ágil Scrum?",
+        "expected_long": (
+            "Scrum es un marco de trabajo ágil para desarrollar productos complejos. Organiza el "
+            "trabajo en iteraciones cortas llamadas sprints (1 a 4 semanas) con un objetivo "
+            "concreto. Define roles (Product Owner, Scrum Master, equipo de desarrollo), "
+            "ceremonias (planificación, daily, review, retrospectiva) y artefactos (product "
+            "backlog, sprint backlog, incremento). Fomenta la entrega continua y la adaptación."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l88",
+        "question": "Explica brevemente qué es el balanceo de carga.",
+        "expected_long": (
+            "El balanceo de carga es la distribución del tráfico entre varios servidores para "
+            "evitar que uno solo se sature. Los balanceadores pueden funcionar a nivel DNS, de "
+            "transporte o de aplicación, y aplican algoritmos como round-robin, menor número de "
+            "conexiones o capacidad en tiempo real. Mejora la disponibilidad, el rendimiento y la "
+            "tolerancia a fallos del sistema."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l89",
+        "question": "¿Qué es la realidad virtual y en qué se diferencia de la realidad aumentada?",
+        "expected_long": (
+            "La realidad virtual (VR) sumerge al usuario en un entorno completamente digital "
+            "mediante un casco y controladores, reemplazando la percepción del mundo real. La "
+            "realidad aumentada (AR) superpone elementos digitales sobre el mundo real, "
+            "complementando la percepción en lugar de sustituirla. Ejemplos de VR son los juegos "
+            "con Meta Quest, y de AR son los filtros de Instagram o Pokémon Go."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l90",
+        "question": "Explica brevemente qué es un ataque DDoS y cómo se mitiga.",
+        "expected_long": (
+            "Un ataque de denegación de servicio distribuido (DDoS) busca saturar un servicio "
+            "online con tráfico malicioso proveniente de muchas fuentes simultáneas, normalmente "
+            "botnets. Se mitiga con redes de distribución de contenido (CDN), firewalls de "
+            "aplicación, rate limiting, scrubbing centers y redundancia geográfica que absorben "
+            "los picos de tráfico."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l91",
+        "question": "¿Qué es un índice en una base de datos relacional?",
+        "expected_long": (
+            "Un índice en una base de datos relacional es una estructura auxiliar que acelera la "
+            "búsqueda de filas según el valor de una o varias columnas. Funciona de forma "
+            "análoga al índice de un libro: en lugar de recorrer toda la tabla, el motor de "
+            "búsqueda consulta el índice para localizar las filas relevantes. Su principal "
+            "trade-off es que las inserciones y actualizaciones se vuelven más costosas."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l92",
+        "question": "Explica brevemente qué es el método Monte Carlo.",
+        "expected_long": (
+            "El método Monte Carlo es una técnica computacional que utiliza números aleatorios "
+            "para resolver problemas deterministas o estocásticos. Se usa para aproximar "
+            "integrales, simular sistemas físicos, evaluar riesgos financieros o resolver "
+            "problemas de optimización. Su precisión mejora con el número de muestras, aunque "
+            "converge relativamente lento."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l93",
+        "question": "¿Qué es una regresión logística y para qué se usa?",
+        "expected_long": (
+            "La regresión logística es un modelo de clasificación que estima la probabilidad de "
+            "que una observación pertenezca a una clase mediante la función logística. A pesar de "
+            "su nombre, es un método de clasificación, no de regresión. Se usa ampliamente en "
+            "problemas binarios como detección de spam, diagnóstico médico o predicción de churn, "
+            "por su interpretabilidad y buen rendimiento en datos linealmente separables."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l94",
+        "question": "¿Qué es una pila tecnológica (tech stack)?",
+        "expected_long": (
+            "Una pila tecnológica es el conjunto de tecnologías que se combinan para construir y "
+            "ejecutar una aplicación. Incluye el lenguaje de programación, el framework, el "
+            "sistema de gestión de bases de datos, el servidor de aplicaciones y otras "
+            "herramientas. Ejemplos comunes son LAMP (Linux, Apache, MySQL, PHP), MEAN (MongoDB, "
+            "Express, Angular, Node.js) o JAMstack (JavaScript, APIs, marcado)."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l95",
+        "question": "Explica brevemente qué es la virtualización.",
+        "expected_long": (
+            "La virtualización es una tecnología que permite ejecutar múltiples sistemas "
+            "operativos o instancias aisladas sobre un único hardware físico, mediante un "
+            "hipervisor. Cada instancia, llamada máquina virtual, dispone de sus propios recursos "
+            "virtuales. Es la base de la computación en la nube y mejora el aprovechamiento del "
+            "hardware, la portabilidad y el aislamiento entre cargas de trabajo."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l96",
+        "question": "¿Qué es un patrón de diseño en ingeniería de software?",
+        "expected_long": (
+            "Un patrón de diseño es una solución reutilizable a un problema recurrente en el "
+            "diseño de software. Los patrones Gang of Four incluyen creacionales (Singleton, "
+            "Factory), estructurales (Adapter, Decorator) y de comportamiento (Observer, "
+            "Strategy). Conocer los patrones ayuda a comunicar soluciones con vocabulario común y "
+            "a evitar reinventar la rueda."
+        ),
+        "difficulty": "medium",
+    },
+    {
+        "id": "l97",
+        "question": "Explica brevemente qué es una cookie HTTP.",
+        "expected_long": (
+            "Una cookie HTTP es un pequeño fragmento de datos que un servidor envía al navegador y "
+            "que este devuelve en peticiones posteriores al mismo dominio. Sirve para mantener "
+            "sesión, recordar preferencias del usuario o medir tráfico. Por seguridad se usan "
+            "atributos como HttpOnly, Secure y SameSite, y existen regulaciones como el GDPR que "
+            "obligan a informar al usuario y obtener consentimiento."
+        ),
+        "difficulty": "medium",
+    },
+    # --- hard (16) ---
+    {
+        "id": "l98",
+        "question": "Explica el teorema de Cook-Levin y por qué es importante.",
+        "expected_long": (
+            "El teorema de Cook-Levin, demostrado en 1971, establece que el problema de "
+            "satisfacibilidad booleana (SAT) es NP-completo. Esto implica que cualquier problema "
+            "en NP puede reducirse a SAT en tiempo polinómico, identificando SAT como el primer "
+            "problema NP-completo. Es la piedra angular de la teoría de la complejidad y guía "
+            "qué problemas son computacionalmente intratables en el peor caso."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l99",
+        "question": "¿Qué es el sesgo inductivo en aprendizaje automático?",
+        "expected_long": (
+            "El sesgo inductivo es el conjunto de suposiciones que hace un modelo para generalizar "
+            "más allá de los datos de entrenamiento. Por ejemplo, una red neuronal convolucional "
+            "asume localidad y translation equivariance; un transformer asume que la atención es "
+            "suficiente para modelar relaciones. Elegir el sesgo correcto es clave: demasiado "
+            "restrictivo impide aprender patrones útiles; demasiado débil requiere muchos más "
+            "datos."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l100",
+        "question": "Explica el teorema CAP y por qué solo se cumplen dos de tres propiedades.",
+        "expected_long": (
+            "El teorema CAP, formulado por Eric Brewer, establece que un sistema distribuido de "
+            "almacenamiento de datos no puede garantizar simultáneamente consistencia (todos los "
+            "nodos ven la misma lectura), disponibilidad (cada petición recibe respuesta) y "
+            "tolerancia a particiones (el sistema sigue funcionando aunque fallen enlaces). Como "
+            "las particiones son inevitables a escala, en la práctica hay que elegir entre "
+            "consistencia y disponibilidad durante una partición, lo que guía el diseño de bases "
+            "de datos modernas."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l101",
+        "question": "Explica brevemente qué es la regularización L1 vs L2 en machine learning.",
+        "expected_long": (
+            "La regularización añade una penalización a la función de pérdida para evitar "
+            "sobreajuste. L1 (lasso) suma el valor absoluto de los pesos, lo que tiende a producir "
+            "modelos dispersos con muchos coeficientes exactamente cero, útil para selección de "
+            "características. L2 (ridge) suma el cuadrado de los pesos, lo que penaliza "
+            "coeficientes grandes de forma suave y generalmente produce modelos con todos los "
+            "pesos pequeños pero no nulos."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l102",
+        "question": "¿Qué es la criptografía de curva elíptica?",
+        "expected_long": (
+            "La criptografía de curva elíptica (ECC) es una familia de criptosistemas de clave "
+            "pública basados en la estructura algebraica de las curvas elípticas sobre campos "
+            "finitos. Ofrece el mismo nivel de seguridad que RSA con claves mucho más cortas (256 "
+            "bits de ECC equivalen aproximadamente a 3072 bits de RSA), lo que reduce el "
+            "consumo computacional y el ancho de banda. Se usa en protocolos como TLS, "
+            "Bitcoin y firmas digitales ECDSA."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l103",
+        "question": "Explica el problema del sesgo-varianza en aprendizaje supervisado.",
+        "expected_long": (
+            "El sesgo-varianza describe el compromiso entre dos fuentes de error de un modelo. El "
+            "sesgo mide el error por suposiciones erróneas (subajuste) y la varianza mide la "
+            "sensibilidad a fluctuaciones del conjunto de entrenamiento (sobreajuste). Modelos "
+            "simples tienen alto sesgo y poca varianza; modelos complejos, lo contrario. El "
+            "objetivo es encontrar el punto de equilibrio que minimice el error total, "
+            "generalmente ajustando la complejidad del modelo o la cantidad de datos."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l104",
+        "question": "¿Qué es el algoritmo PageRank y qué tipo de matriz usa?",
+        "expected_long": (
+            "PageRank es un algoritmo que mide la importancia de los nodos en un grafo "
+            "dirigido, originalmente las páginas web. Construye una matriz de transición M donde "
+            "M_ij es la probabilidad de pasar del nodo j al nodo i siguiendo un enlace, y "
+            "calcula el vector estacionario π tal que π = πM, lo que equivale al autovector "
+            "principal de M^T asociado al autovalor 1. Para asegurar convergencia se añade un "
+            "factor de amortiguación (damping) que modela saltos aleatorios."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l105",
+        "question": "Explica brevemente qué es la descomposición en valores singulares (SVD).",
+        "expected_long": (
+            "La descomposición en valores singulares factoriza cualquier matriz A en A = U Σ V^T, "
+            "donde U y V son matrices ortogonales y Σ es diagonal con los valores singulares "
+            "(no negativos y ordenados). Es la base de muchas técnicas: reducción de "
+            "dimensionalidad (PCA), compresión de imágenes, sistemas de recomendación y "
+            "resolución de mínimos cuadrados. Se puede ver como una generalización de la "
+            "diagonalización a matrices no cuadradas."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l106",
+        "question": "¿Qué es el principio de máxima entropía en modelado probabilístico?",
+        "expected_long": (
+            "El principio de máxima entropía establece que, ante varias distribuciones de "
+            "probabilidad compatibles con la información disponible, debe elegirse la de mayor "
+            "entropía, es decir, la que hace menos suposiciones más allá de lo conocido. Esto "
+            "produce modelos menos sesgados: por ejemplo, en procesamiento de lenguaje natural, el "
+            "modelo de máxima entropía elige la distribución exponencial que mejor se ajusta a "
+            "las restricciones observadas."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l107",
+        "question": "Explica qué es un espacio de Hilbert y su relevancia en mecánica cuántica.",
+        "expected_long": (
+            "Un espacio de Hilbert es un espacio vectorial completo con producto interno, "
+            "generalización de dimensión infinita del espacio euclídeo. En mecánica cuántica, los "
+            "estados de un sistema se representan como vectores unitarios en un espacio de "
+            "Hilbert y los observables como operadores hermíticos. El producto interno permite "
+            "calcular probabilidades de transición, y la completitud garantiza la existencia de "
+            "límites en procesos físicos continuos."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l108",
+        "question": "¿Qué es el algoritmo de Lloyd para clustering k-means?",
+        "expected_long": (
+            "El algoritmo de Lloyd es el método iterativo clásico para resolver k-means. "
+            "Comienza con k centroides iniciales y alterna dos pasos: (1) asignar cada punto al "
+            "centroide más cercano y (2) recolocar cada centroide en la media de sus puntos "
+            "asignados. El proceso se repite hasta que las asignaciones convergen. Aunque es "
+            "sencillo, solo garantiza óptimos locales y es sensible a la inicialización, por lo "
+            "que suele ejecutarse varias veces con semillas distintas (k-means++ es una "
+            "inicialización más robusta)."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l109",
+        "question": "Explica brevemente qué es el teorema de Bayes y un ejemplo de uso.",
+        "expected_long": (
+            "El teorema de Bayes relaciona las probabilidades condicionales de dos eventos: "
+            "P(A|B) = P(B|A) · P(A) / P(B). Permite actualizar la probabilidad de una hipótesis A "
+            "a la luz de nueva evidencia B. Por ejemplo, en diagnóstico médico: si una "
+            "enfermedad tiene prevalencia 1% y una prueba tiene 99% de sensibilidad y 95% de "
+            "especificidad, un resultado positivo solo eleva la probabilidad de estar enfermo a "
+            "aproximadamente 17%, lo que explica por qué las pruebas de cribado se confirman con "
+            "una segunda prueba."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l110",
+        "question": "¿Qué es la complejidad P vs NP?",
+        "expected_long": (
+            "La complejidad P vs NP pregunta si todo problema cuya solución puede verificarse en "
+            "tiempo polinómico (NP) puede también resolverse en tiempo polinómico (P). La mayoría "
+            "de los expertos cree que P ≠ NP, pero no se ha demostrado. Su resolución tendría "
+            "implicaciones enormes: por ejemplo, rompería la mayoría de los sistemas de "
+            "criptografía de clave pública actuales (RSA, ECC) y revolucionaría la optimización "
+            "combinatoria."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l111",
+        "question": "Explica brevemente qué es la entropía cruzada en aprendizaje automático.",
+        "expected_long": (
+            "La entropía cruzada es una función de pérdida común en clasificación que mide la "
+            "divergencia entre la distribución de probabilidad predicha por el modelo y la "
+            "distribución verdadera (etiqueta). Para clasificación binaria se formula como "
+            "-[y·log(p) + (1-y)·log(1-p)], donde p es la probabilidad predicha de la clase "
+            "positiva. Es la elección estándar con softmax en la capa de salida y se prefiere "
+            "sobre el error cuadrático medio por sus mejores propiedades de gradiente."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l112",
+        "question": "¿Qué es la paradoja de Simpson y cómo se resuelve?",
+        "expected_long": (
+            "La paradoja de Simpson ocurre cuando una tendencia estadística aparece en varios "
+            "grupos de datos pero se invierte o desaparece cuando se combinan esos grupos. Ocurre "
+            "porque las variables de confusión distorsionan las asociaciones agregadas. Se "
+            "resuelve estratificando por la variable confusora, ajustando modelos multivariados o "
+            "usando técnicas causales como propensity score matching para aislar el efecto real."
+        ),
+        "difficulty": "hard",
+    },
+    {
+        "id": "l113",
+        "question": "Explica brevemente qué es un espacio de nombres en sistemas de archivos.",
+        "expected_long": (
+            "Un espacio de nombres es el esquema que define los nombres válidos para "
+            "identificar recursos en un sistema. En sistemas de archivos, los nombres suelen ser "
+            "cadenas jerárquicas separadas por delimitadores ('/' en Unix, '\\' en Windows). Un "
+            "buen espacio de nombres es único, persistente y no depende de la ubicación física. "
+            "En sistemas distribuidos, sistemas como HDFS o S3 mantienen espacios de nombres "
+            "globales sobre almacenamiento particionado."
+        ),
+        "difficulty": "hard",
+    },
+]
+
+
 def build_dataset(seed: int = 42) -> list[dict[str, Any]]:
     """Return the full dataset with both `expected_short` and `expected_long` filled.
 
     For short rows the `expected_long` field is set to the short answer wrapped
     in a one-sentence justification, so the CROP pipeline always has a long
     target to work with if it ends up routed to a `long` row by mistake.
+
+    In iteration 2 the original 63 rows are concatenated with ``_SHORT_ROWS_EXTRA``
+    (80 rows) and ``_LONG_ROWS_EXTRA`` (80 rows), for a target total above the
+    200-example threshold specified in ``reports/informe.md`` §8.2.
     """
     rng = random.Random(seed)
     rows: list[dict[str, Any]] = []
-    for r in _SHORT_ROWS:
+    for r in _SHORT_ROWS + _SHORT_ROWS_EXTRA:
         long_fallback = f"{r['expected_short']} (respuesta corta del conjunto de referencia)."
         rows.append(
             {
@@ -479,7 +1545,7 @@ def build_dataset(seed: int = 42) -> list[dict[str, Any]]:
                 "difficulty": r["difficulty"],
             }
         )
-    for r in _LONG_ROWS:
+    for r in _LONG_ROWS + _LONG_ROWS_EXTRA:
         rows.append(
             {
                 "id": r["id"],

@@ -75,6 +75,7 @@ class RunResult:
     accuracy: float
     accuracy_short: float
     accuracy_long: float
+    fuzzy_short_accuracy: float
     judge_score_long: float
     tokens_in_total: int
     tokens_out_total: int
@@ -94,6 +95,7 @@ class RunResult:
             "accuracy": self.accuracy,
             "accuracy_short": self.accuracy_short,
             "accuracy_long": self.accuracy_long,
+            "fuzzy_short_accuracy": self.fuzzy_short_accuracy,
             "judge_score_long": self.judge_score_long,
             "tokens_in_total": self.tokens_in_total,
             "tokens_out_total": self.tokens_out_total,
@@ -188,6 +190,7 @@ def run_baseline(
         accuracy=score.accuracy,
         accuracy_short=score.accuracy_short,
         accuracy_long=score.accuracy_long,
+        fuzzy_short_accuracy=score.fuzzy_short_accuracy,
         judge_score_long=score.judge_score_long,
         tokens_in_total=score.tokens_in_total,
         tokens_out_total=score.tokens_out_total,
@@ -206,27 +209,46 @@ def run_baseline(
 def run_capo(
     seed: int = 0,
     *,
-    n_generations: int = 2,
-    population_size: int = 4,
+    n_generations: int = 4,
+    population_size: int = 8,
     use_judge: bool = False,  # turn off by default to keep CAPO cheap
+    pairwise_test: str = "wilcoxon",
+    correction: str = "holm",
     client: Optional[LLMClient] = None,
     logger: Optional[JSONLLogger] = None,
     max_budget_usd: float = SETTINGS.max_budget_usd,
 ) -> RunResult:
-    """CAPO: Racing + Holm-Bonferroni + length penalty. No Critic."""
+    """CAPO: Racing + Holm-Bonferroni + length penalty. No Critic.
+
+    Iteration 2 defaults: ``n_generations=4`` and ``population_size=8`` were
+    raised from the prototype's 2/4 because the original configuration made
+    the racing collapse to ``n_survivors=0`` in 5/5 seeds (see
+    ``reports/informe.md`` §7.5). The pairwise test also defaults to
+    ``wilcoxon`` because Wilcoxon is more robust on small per-block sample
+    sizes (5–12 items).
+    """
     set_seed(seed)
     client = client or LLMClient()
     if logger is not None:
         set_logger(logger)
     log = get_logger()
-    log.log(event="run_start", condition="capo", seed=seed)
+    log.log(
+        event="run_start",
+        condition="capo",
+        seed=seed,
+        n_generations=n_generations,
+        population_size=population_size,
+        pairwise_test=pairwise_test,
+        correction=correction,
+    )
 
     rows = load_dataset(SETTINGS.data_path)
     dev, test, _hold = _split_dataset(rows, seed=seed)
 
-    # Hyperparameters — scaled down from the paper for a 1-week prototype.
+    # Hyperparameters — raised from the prototype defaults to mitigate the
+    # CAPO collapse documented in reports/informe.md §7.5.
     block_size = max(3, min(SETTINGS.block_size, len(dev) // 2))
-    n_survive = max(1, population_size // 2)
+    n_survive = max(2, population_size // 2)
     z_max = max(2, len(dev) // block_size)
 
     scorer = MultiObjectiveScorer(
@@ -241,7 +263,8 @@ def run_capo(
         alpha=SETTINGS.alpha,
         n_survive=n_survive,
         z_max=z_max,
-        pairwise_test="ttest",
+        pairwise_test=pairwise_test,
+        correction=correction,
     )
     budget = BudgetGuard(max_budget_usd)
 
@@ -309,6 +332,7 @@ def run_capo(
         accuracy=score.accuracy,
         accuracy_short=score.accuracy_short,
         accuracy_long=score.accuracy_long,
+        fuzzy_short_accuracy=score.fuzzy_short_accuracy,
         judge_score_long=score.judge_score_long,
         tokens_in_total=score.tokens_in_total,
         tokens_out_total=score.tokens_out_total,
@@ -318,7 +342,12 @@ def run_capo(
         latency_ms_mean=latency,
         n_generations=n_generations,
         n_llm_calls=len(test),
-        notes={"n_survivors": len(population)},
+        notes={
+            "n_survivors": len(population),
+            "pairwise_test": pairwise_test,
+            "correction": correction,
+            "population_size": population_size,
+        },
     )
 
 
@@ -414,6 +443,7 @@ def run_crop(
         accuracy=score.accuracy,
         accuracy_short=score.accuracy_short,
         accuracy_long=score.accuracy_long,
+        fuzzy_short_accuracy=score.fuzzy_short_accuracy,
         judge_score_long=score.judge_score_long,
         tokens_in_total=score.tokens_in_total,
         tokens_out_total=score.tokens_out_total,
@@ -432,26 +462,40 @@ def run_crop(
 def run_unified(
     seed: int = 0,
     *,
-    n_generations: int = 2,
-    population_size: int = 4,
+    n_generations: int = 4,
+    population_size: int = 8,
     use_judge: bool = True,
+    pairwise_test: str = "wilcoxon",
+    correction: str = "holm",
     client: Optional[LLMClient] = None,
     logger: Optional[JSONLLogger] = None,
     max_budget_usd: float = SETTINGS.max_budget_usd,
 ) -> RunResult:
-    """Unified pipeline: CAPO (racing + Holm + length penalty) + CROP (critic)."""
+    """Unified pipeline: CAPO (racing + Holm + length penalty) + CROP (critic).
+
+    Iteration 2 defaults mirror ``run_capo``: ``n_generations=4``,
+    ``population_size=8``, ``pairwise_test='wilcoxon'``, ``correction='holm'``.
+    """
     set_seed(seed)
     client = client or LLMClient()
     if logger is not None:
         set_logger(logger)
     log = get_logger()
-    log.log(event="run_start", condition="unified", seed=seed)
+    log.log(
+        event="run_start",
+        condition="unified",
+        seed=seed,
+        n_generations=n_generations,
+        population_size=population_size,
+        pairwise_test=pairwise_test,
+        correction=correction,
+    )
 
     rows = load_dataset(SETTINGS.data_path)
     dev, test, _hold = _split_dataset(rows, seed=seed)
 
     block_size = max(3, min(SETTINGS.block_size, len(dev) // 2))
-    n_survive = max(1, population_size // 2)
+    n_survive = max(2, population_size // 2)
     z_max = max(2, len(dev) // block_size)
 
     scorer = MultiObjectiveScorer(
@@ -467,7 +511,8 @@ def run_unified(
         alpha=SETTINGS.alpha,
         n_survive=n_survive,
         z_max=z_max,
-        pairwise_test="ttest",
+        pairwise_test=pairwise_test,
+        correction=correction,
     )
     budget = BudgetGuard(max_budget_usd)
 
@@ -562,6 +607,7 @@ def run_unified(
         accuracy=score.accuracy,
         accuracy_short=score.accuracy_short,
         accuracy_long=score.accuracy_long,
+        fuzzy_short_accuracy=score.fuzzy_short_accuracy,
         judge_score_long=score.judge_score_long,
         tokens_in_total=score.tokens_in_total,
         tokens_out_total=score.tokens_out_total,
@@ -571,4 +617,10 @@ def run_unified(
         latency_ms_mean=latency,
         n_generations=n_generations,
         n_llm_calls=len(test) * (n_generations + 1),
+        notes={
+            "n_survivors": len(population) if population else 0,
+            "pairwise_test": pairwise_test,
+            "correction": correction,
+            "population_size": population_size,
+        },
     )

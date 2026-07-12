@@ -103,6 +103,20 @@ class RacingEvaluator:
     pairwise_test:
         `ttest` (paired t-test, the CAPO default) or `wilcoxon` (paired
         Wilcoxon, more robust on tiny blocks).
+    correction:
+        Multiple-testing correction applied on top of the pairwise test:
+
+        * ``"holm"`` (default) — Holm-Bonferroni step-down, the original
+          prototype behaviour.
+        * ``"none"`` — paired t-test without correction, matching the CAPO
+          paper's Algorithm 2 and used for the ablation in
+          ``reports/informe.md`` §8.2.
+        * ``"bonferroni"`` — classical Bonferroni (single-step) for a
+          middle-ground reference.
+
+        Ignored when ``pairwise_test == "wilcoxon"`` because the Wilcoxon
+        test is already non-parametric and the original implementation only
+        runs the correction step on the t-test branch.
     """
 
     def __init__(
@@ -113,14 +127,18 @@ class RacingEvaluator:
         n_survive: int = 1,
         z_max: int = 10,
         pairwise_test: str = "ttest",
+        correction: str = "holm",
     ) -> None:
         if pairwise_test not in {"ttest", "wilcoxon"}:
             raise ValueError("pairwise_test must be 'ttest' or 'wilcoxon'")
+        if correction not in {"holm", "none", "bonferroni"}:
+            raise ValueError("correction must be 'holm', 'none', or 'bonferroni'")
         self.block_size = block_size
         self.alpha = alpha
         self.n_survive = n_survive
         self.z_max = z_max
         self.pairwise_test = pairwise_test
+        self.correction = correction
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -163,12 +181,22 @@ class RacingEvaluator:
         *,
         block_index: int,
     ) -> tuple[list[Candidate], list[Candidate]]:
-        """Apply Holm-Bonferroni to the current score buffer.
+        """Apply the configured correction to the current score buffer.
 
         A candidate is eliminated iff, for at least `n_survive` opponents,
-        Holm's procedure rejects the null "this candidate is no worse than
-        the opponent". Equivalently: there are at least `n_survive` opponents
-        that Holm says are *significantly* better than this candidate.
+        the corrected procedure rejects the null "this candidate is no worse
+        than the opponent". Equivalently: there are at least `n_survive`
+        opponents that the test declares *significantly* better than this
+        candidate.
+
+        Behaviour by ``correction`` value:
+
+        * ``"holm"`` — Holm-Bonferroni step-down (default, original
+          prototype behaviour).
+        * ``"none"`` — single-step comparison at level ``alpha`` (matches
+          the CAPO paper, no correction for multiple testing).
+        * ``"bonferroni"`` — classical Bonferroni (single-step) at level
+          ``alpha / m``.
         """
         active = [c for c in candidates if c.eliminated_at_block is None]
         if len(active) <= self.n_survive:
@@ -176,36 +204,51 @@ class RacingEvaluator:
 
         eliminated_now: list[Candidate] = []
         for cand in active:
-            pvals = []
-            opponents_better = 0
+            pvals: list[float] = []
             for other in active:
                 if other is cand:
                     continue
                 a = np.asarray(cand.block_scores, dtype=float)
                 b = np.asarray(other.block_scores, dtype=float)
                 n = min(len(a), len(b))
-                p = self._pairwise_pvalue(a[:n], b[:n])
-                pvals.append(p)
-            # Holm-Bonferroni on the p-values. For each p-value, the test
-            # says "candidate is no worse than opponent". Holm rejects the
-            # null at index k when p_(k) > alpha/(m-k+1). The smallest p
-            # being too large means the candidate is clearly worse than
-            # *at least* one opponent. We count how many opponents Holm
-            # finds to be *significantly* better.
-            survive_flags = holm_bonferroni(pvals, alpha=self.alpha)
-            # `survive_flags[i] == False` ⇒ Holm rejected the null ⇒ opponent
-            # i is significantly better than `cand`.
-            opponents_better = sum(1 for f in survive_flags if not f)
+                pvals.append(self._pairwise_pvalue(a[:n], b[:n]))
+            opponents_better = self._count_opponents_better(pvals)
             if opponents_better >= max(1, self.n_survive):
                 cand.eliminated_at_block = block_index
                 cand.elimination_reason = (
-                    f"holm: {opponents_better} opponents significantly better"
+                    f"{self.correction}: {opponents_better} opponents significantly better"
                 )
                 eliminated_now.append(cand)
 
         new_active = [c for c in active if c.eliminated_at_block is None]
         already_out = [c for c in candidates if c.eliminated_at_block is not None and c not in eliminated_now]
         return new_active, eliminated_now + already_out
+
+    def _count_opponents_better(self, pvals: list[float]) -> int:
+        """Return how many opponents are *significantly* better than the candidate.
+
+        Dispatches to the configured multiple-testing correction:
+
+        * ``holm``        — Holm-Bonferroni step-down (the original prototype
+          logic). ``opponents_better`` counts opponents whose Holm step
+          rejects the null at level ``alpha``.
+        * ``bonferroni``  — single-step Bonferroni at ``alpha / m``.
+        * ``none``        — raw ``p <= alpha`` per opponent, matching the
+          CAPO paper Algorithm 2.
+        """
+        m = len(pvals)
+        if m == 0:
+            return 0
+        if self.correction == "holm":
+            survive_flags = holm_bonferroni(pvals, alpha=self.alpha)
+            # `survive_flags[i] == False` ⇒ Holm rejected the null ⇒
+            # opponent i is significantly better than `cand`.
+            return sum(1 for f in survive_flags if not f)
+        if self.correction == "bonferroni":
+            threshold = self.alpha / m
+            return sum(1 for p in pvals if p <= threshold)
+        # "none": CAPO paper behaviour — raw p <= alpha per opponent.
+        return sum(1 for p in pvals if p <= self.alpha)
 
     # ------------------------------------------------------------------
     # Public API
