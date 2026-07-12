@@ -23,11 +23,11 @@ cp .env.example .env
 #   URL_API_BASE=https://api.minimax.io/v1
 #   MODEL=MiniMax-M2.5-highspeed
 
-# 3. (Opcional) Regenerar el dataset toy (63 ejemplos QA en español)
+# 3. (Opcional) Regenerar el dataset toy (223 ejemplos QA en español)
 python -m src.data_gen
 
-# 4. Correr las 4 condiciones × 3 seeds
-python -m experiments.run_all --seeds 0 1 2 --budget 5
+# 4. Correr las 4 condiciones × 10 seeds
+python -m experiments.run_all --seeds 0 1 2 3 4 5 6 7 8 9 --budget 5
 
 # 5. Agregar, analizar y graficar
 python -m analysis.aggregate
@@ -47,13 +47,14 @@ Si solo quieres probar la integración sin gastar API, todos los *scripts* admit
 | Decisión | Por qué |
 |---|---|
 | **Sin MLflow / W&B / DVC** | Para 1 semana la infraestructura mata. JSONL + CSV basta. |
-| **Dataset toy propio (63 ejemplos)** | Control de variabilidad, *scoring* determinístico, cero dependencias de HuggingFace. |
+| **Dataset toy propio (223 ejemplos)** | Control de variabilidad, *scoring* determinístico, cero dependencias de HuggingFace. Iteración 2 amplió de 63 → 223 filas para alcanzar potencia estadística. |
 | **MiniMax como objetivo Y Critic** | Una sola API key, una sola cuenta de costos. Configurable vía `MODEL`. |
 | **2 operadores de mutación** (`paraphrase`, `add_constraint`) | Cubre los efectos más reportados; `swap_fewshot` queda como opcional. |
-| **Holm-Bonferroni en el racing** | Más conservador que el t-test pareado del *paper* CAPO; protege contra eliminación prematura. |
+| **Wilcoxon + Holm-Bonferroni** | Wilcoxon es robusto con muestras pequeñas (5–12 ítems por bloque). Holm protege contra eliminación prematura. La corrección es configurable (`--correction holm\|none\|bonferroni`) para reproducir el paper CAPO. |
 | **Política percentil 70 del Critic** | Invoca al Critic solo cuando la salida supera el P70 del *pool* (sigue a CROP). |
 | **`temperature = 0`** por defecto | Reduce (sin eliminar) el no-determinismo de la API. |
-| **Mock LLM para tests** | `_enable_mock()` activa respuestas deterministas; los 24 *smoke tests* pasan sin red. |
+| **Mock LLM para tests** | `_enable_mock()` activa respuestas deterministas; los 33 *smoke tests* pasan sin red. |
+| **Fuzzy match para SHORT** | `rapidfuzz.fuzz.token_set_ratio` reconoce respuestas que contienen el token esperado aunque estén envueltas en prosa (p. ej. "El cuerpo humano adulto tiene 206 huesos" → esperado "206"). Umbral por defecto: 0.85. |
 
 ---
 
@@ -66,7 +67,7 @@ capo-crop-unified/
 ├── .env.example
 ├── .gitignore
 ├── data/
-│   └── toy_qa.jsonl          ← 63 ejemplos QA en español
+│   └── toy_qa.jsonl          ← 223 ejemplos QA en español
 ├── src/
 │   ├── config.py             ← carga .env y expone Settings
 │   ├── data_gen.py           ← genera el dataset toy
@@ -116,12 +117,15 @@ capo-crop-unified/
 |---|---|---|
 | `alpha` (Holm) | 0.2 | Default CAPO |
 | `gamma` (long. CAPO) | 0.05 | Default CAPO |
-| `block_size` | 3–10 | Adaptado a `len(dev)` |
-| `z_max` | 2–6 | Deriva de `len(dev) // block_size` |
-| `population_size` | 4 | Reducido por restricción de tiempo |
+| `block_size` | 3–30 | Adaptado a `len(dev)` |
+| `z_max` | 2–10 | Deriva de `len(dev) // block_size` |
+| `population_size` | 8 | antes 4 |
 | `crossovers_per_iter` | 3 | Suficiente para 4 supervivientes |
-| `n_survive` | 2 | Mitad de la población |
-| `n_generations` | 2 | Suficiente para observar Pareto |
+| `n_survive` | 4 | Mitad de la población (mínimo 2) |
+| `n_generations` | 4 | antes 2 |
+| `pairwise_test` | `wilcoxon` | antes `ttest`. Más robusto con n pequeño. |
+| `correction` | `holm` | Holm-Bonferroni (default). `none` reproduce CAPO paper, `bonferroni` es single-step. |
+| `fuzzy_threshold` | 0.85 | `rapidfuzz.token_set_ratio` mínimo para considerar `correct` en SHORT. |
 | `beta` (long. CROP) | 0.05 | Default CROP |
 
 Todos los hiperparámetros son configurables desde `config.py` o como flags de los *scripts* de `experiments/`.
@@ -134,20 +138,23 @@ Todos los hiperparámetros son configurables desde `config.py` o como flags de l
 # Baseline
 python -m experiments.run_baseline --seed 0 --budget 5
 
-# CAPO
-python -m experiments.run_capo --seed 0 --budget 5 --generations 2 --population 4
+# CAPO (defaults: generations=4, population=8, wilcoxon, holm)
+python -m experiments.run_capo --seed 0 --budget 5 --generations 4 --population 8
 
 # CROP
 python -m experiments.run_crop --seed 0 --budget 5 --iterations 2
 
 # Unified
-python -m experiments.run_unified --seed 0 --budget 5 --generations 2 --population 4
+python -m experiments.run_unified --seed 0 --budget 5 --generations 4 --population 8
+
+# Ablación Holm vs t-test pareado sin corrección (paper CAPO)
+python -m experiments.run_capo --seed 0 --correction none --pairwise-test ttest
 ```
 
 Cada *script* escribe:
 
 - `results/raw/<condición>/seed<N>.jsonl` — log JSONL con cada llamada al LLM.
-- `results/raw/<condición>/seed<N>.json` — resumen de métricas (accuracy, costo, prompt final).
+- `results/raw/<condición>/seed<N>.json` — resumen de métricas (accuracy, costo, prompt final, `pairwise_test`, `correction`).
 
 ---
 
@@ -173,12 +180,12 @@ pandoc reports/informe.md -o reports/informe.html --standalone
 ## 7. Limitaciones conocidas
 
 - **API no determinista.** `temperature = 0` no garantiza igualdad bit-a-bit. Los números pueden variar entre corridas; el Wilcoxon pareado mitiga esto.
-- **Dataset toy.** 63 ejemplos no captura la complejidad de BIG-bench ni GSM8K. Las conclusiones se re-evaluarán a mayor escala en el siguiente hito.
-- **Holm-Bonferroni en lugar de t-test sin corrección.** Decisión propia de la especificación; diverge del *paper* CAPO. Con Holm el *racing* es más conservador.
-- **3 *seeds*.** Poca potencia estadística. El README sugiere 5 *seeds* si el tiempo lo permite.
+- **Dataset toy.** 223 ejemplos no captura la complejidad de BIG-bench ni GSM8K. Las conclusiones se re-evaluarán a mayor escala en el siguiente hito.
+- **Default de Holm-Bonferroni diverge del paper CAPO.** El paper usa t-test pareado sin corrección. El default actual sigue siendo Holm (más conservador) pero el flag `--correction none` reproduce exactamente el comportamiento del paper.
+- **10 *seeds* por defecto.** Suficiente para potencia razonable en Wilcoxon pareado (con n=5 era de ≈0.4 para efectos d≈0.4). Las corridas individuales pueden usar `--seeds N` para reducir si el tiempo aprieta.
 - **Default apunta a `api.minimax.io`.** Si tu contrato está en `api.minimaxi.com` (plan legado), override `URL_API_BASE` en `.env`.
 - **Reasoning tokens de MiniMax-M2.5-highspeed.** El modelo emite tokens de razonamiento interno en **70–99%** de la salida facturada, incluso para prompts triviales. Los parámetros `thinking: {type: disabled}` (M3), `reasoning: {enabled: false}` y `reasoning_effort: 0` **no surten efecto** en M2.5. `LLMResponse` expone `reasoning_tokens` por separado para que el *pipeline* y `cost_model.py` puedan desglosar el costo si lo desean.
-- **Sin *ablation* exhaustiva.** No se corrieron `capo-sin-Racing` ni `crop-sin-Critic`; documentado en `reports/informe.md` §7.2.
+- **Ablación Holm vs t-test ejecutable vía CLI.** `--correction holm|none|bonferroni` + `--pairwise-test ttest|wilcoxon` cubre la matriz principal; documentado en `reports/informe.md` §8.2 (corto plazo).
 
 ---
 
@@ -188,7 +195,7 @@ pandoc reports/informe.md -o reports/informe.html --standalone
 python -m pytest tests/ -v
 ```
 
-Resultado esperado: **24/24 pasan** (Holm-Bonferroni invariantes, modelo de costos, dominancia de Pareto, *scoring*, *pipeline* end-to-end con LLM *mock*).
+Resultado esperado: **33/33 pasan**. Cubre Holm-Bonferroni, Wilcoxon, las tres correcciones (holm/none/bonferroni), modelo de costos, dominancia de Pareto, fuzzy scorer SHORT, *scoring* LONG, *pipeline* end-to-end con LLM *mock*.
 
 Si un test falla, el mensaje indica exactamente qué invariante se rompió — útil para diagnosticar cambios accidentales en el *racing* o el *scoring*.
 
