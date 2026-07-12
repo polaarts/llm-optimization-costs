@@ -6,9 +6,11 @@ import json
 from src.scorer import (
     CandidateScore,
     EvaluationRow,
-    extract_final_answer,
+    MultiObjectiveScorer,
+    _fuzzy_short_score,
     _normalise,
     _parse_judge_json,
+    extract_final_answer,
 )
 
 
@@ -66,3 +68,49 @@ def test_candidate_score_aggregate_basic():
     assert cs.accuracy_long == 0.0
     assert cs.tokens_in_total == 20
     assert cs.tokens_out_total == 10
+
+
+# ---------------------------------------------------------------------------
+# Fuzzy match (iteration 2 — reports/informe.md §8.2)
+# ---------------------------------------------------------------------------
+def test_fuzzy_short_match_close_enough():
+    """Verbose prediction that contains the expected token verbatim."""
+    score = _fuzzy_short_score("El cuerpo humano adulto tiene 206 huesos", "206")
+    assert score >= 0.5  # token_set_ratio rewards inclusion
+
+
+def test_fuzzy_short_match_exact():
+    assert _fuzzy_short_score("París", "París") == 1.0
+    # Accent stripping is part of `_normalise` so unaccented input matches.
+    assert _fuzzy_short_score("Paris", "París") >= 0.5
+
+
+def test_fuzzy_short_match_threshold():
+    s = MultiObjectiveScorer(use_judge=False, alpha=0.0, fuzzy_threshold=0.85)
+    # Above threshold → correct.
+    assert s._is_short_correct("París", "París")[0] is True
+    # Below threshold → not correct (returns the continuous score for analysis).
+    correct, score = s._is_short_correct("alguna respuesta sin relacion", "París")
+    assert correct is False
+    assert 0.0 <= score < 0.85
+
+
+def test_fuzzy_short_accuracy_in_aggregate():
+    """`CandidateScore.fuzzy_short_accuracy` is the mean fuzzy_score over short rows."""
+    rows = [
+        EvaluationRow(
+            id="s1", question="q", expected_short="206", expected_long="x",
+            response_text="<final_answer>El cuerpo tiene 206 huesos</final_answer>",
+            extracted="El cuerpo tiene 206 huesos", correct=True,
+            judge_score=None, fuzzy_score=1.0, tokens_in=5, tokens_out=5,
+        ),
+        EvaluationRow(
+            id="s2", question="q", expected_short="7", expected_long="x",
+            response_text="<final_answer>siete</final_answer>", extracted="siete",
+            correct=False, judge_score=None, fuzzy_score=0.0, tokens_in=5, tokens_out=5,
+        ),
+    ]
+    scorer = MultiObjectiveScorer(use_judge=False, alpha=0.0)
+    cs = scorer.aggregate(rows)
+    assert cs.fuzzy_short_accuracy == 0.5
+    assert "fuzzy_short_accuracy" in cs.as_dict()
