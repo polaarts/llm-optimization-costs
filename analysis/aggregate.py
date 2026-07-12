@@ -42,6 +42,7 @@ def _summary(df: pd.DataFrame) -> pd.DataFrame:
         "accuracy",
         "accuracy_short",
         "accuracy_long",
+        "fuzzy_short_accuracy",
         "judge_score_long",
         "tokens_in_total",
         "tokens_out_total",

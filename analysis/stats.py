@@ -19,6 +19,7 @@ from src.utils.stats import bootstrap_ci, cohens_d, paired_wilcoxon
 CONDITIONS = ["baseline", "capo", "crop", "unified"]
 METRICS = [
     "accuracy",
+    "fuzzy_short_accuracy",
     "tokens_in_total",
     "tokens_out_total",
     "cost_total_usd",
