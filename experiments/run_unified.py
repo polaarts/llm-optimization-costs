@@ -17,8 +17,18 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--budget", type=float, default=SETTINGS.max_budget_usd)
-    parser.add_argument("--generations", type=int, default=2)
-    parser.add_argument("--population", type=int, default=4)
+    parser.add_argument("--generations", type=int, default=4)
+    parser.add_argument("--population", type=int, default=8)
+    parser.add_argument(
+        "--pairwise-test",
+        choices=["ttest", "wilcoxon"],
+        default="wilcoxon",
+    )
+    parser.add_argument(
+        "--correction",
+        choices=["holm", "none", "bonferroni"],
+        default="holm",
+    )
     args = parser.parse_args()
 
     out_dir = SETTINGS.raw_dir / "unified"
@@ -29,6 +39,8 @@ def main() -> None:
         seed=args.seed,
         n_generations=args.generations,
         population_size=args.population,
+        pairwise_test=args.pairwise_test,
+        correction=args.correction,
         logger=logger,
         max_budget_usd=args.budget,
     )

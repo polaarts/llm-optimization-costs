@@ -42,6 +42,8 @@ def _run_condition(
     budget: float,
     generations: int,
     population: int,
+    pairwise_test: str,
+    correction: str,
 ) -> None:
     fn = CONDITION_FNS[condition]
     out_dir = SETTINGS.raw_dir / condition
@@ -56,6 +58,7 @@ def _run_condition(
         elif condition == "capo":
             res = fn(
                 seed=seed, n_generations=generations, population_size=population,
+                pairwise_test=pairwise_test, correction=correction,
                 logger=logger, max_budget_usd=budget,
             )
         elif condition == "crop":
@@ -66,6 +69,7 @@ def _run_condition(
         else:  # unified
             res = fn(
                 seed=seed, n_generations=generations, population_size=population,
+                pairwise_test=pairwise_test, correction=correction,
                 logger=logger, max_budget_usd=budget,
             )
         elapsed = time.perf_counter() - start
@@ -89,10 +93,20 @@ def _run_condition(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
+    parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     parser.add_argument("--budget", type=float, default=SETTINGS.max_budget_usd)
-    parser.add_argument("--generations", type=int, default=2)
-    parser.add_argument("--population", type=int, default=4)
+    parser.add_argument("--generations", type=int, default=4)
+    parser.add_argument("--population", type=int, default=8)
+    parser.add_argument(
+        "--pairwise-test",
+        choices=["ttest", "wilcoxon"],
+        default="wilcoxon",
+    )
+    parser.add_argument(
+        "--correction",
+        choices=["holm", "none", "bonferroni"],
+        default="holm",
+    )
     parser.add_argument(
         "--condition",
         choices=["all", "baseline", "capo", "crop", "unified"],
@@ -106,7 +120,10 @@ def main() -> None:
     print(f"Running {len(conditions)} conditions x {len(args.seeds)} seeds ...")
     for cond in conditions:
         for seed in args.seeds:
-            _run_condition(cond, seed, args.budget, args.generations, args.population)
+            _run_condition(
+                cond, seed, args.budget, args.generations, args.population,
+                args.pairwise_test, args.correction,
+            )
     print("Done.")
 
 
