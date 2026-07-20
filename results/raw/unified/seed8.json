@@ -1,0 +1,23 @@
+{
+  "condition": "unified",
+  "seed": 8,
+  "final_prompt": "Facilita una contestación lo más precisa posible al planteamiento formulado. Cuando proceda, expone la solución concluyente delimitada por las etiquetas <final_answer>...</final_answer>.\n\nCriterio complementario: Inicia con la respuesta definitiva y, a continuación, incorpora una breve explicación que la respalde.\n\nIndicación de brevedad: Se han omitido las alusiones a rutas, esquemas y redundancias; solo se conserva la esencia del enunciado.\n\nLimitación añadida: Redacta de manera sucinta, sin reproducir la pregunta.",
+  "accuracy": 0.9318181818181818,
+  "accuracy_short": 0.8,
+  "accuracy_long": 1.0,
+  "fuzzy_short_accuracy": 0.9063481446090141,
+  "judge_score_long": 0.8568965517241378,
+  "tokens_in_total": 13320,
+  "tokens_out_total": 4613,
+  "cost_in_usd": 0.007991999999999999,
+  "cost_out_usd": 0.0110712,
+  "cost_total_usd": 0.0190632,
+  "latency_ms_mean": 81175.92308522729,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 3571.7469605419974
+}

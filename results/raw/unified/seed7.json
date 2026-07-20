@@ -1,0 +1,23 @@
+{
+  "condition": "unified",
+  "seed": 7,
+  "final_prompt": "Responde a la siguiente interrogante con la máxima precisión posible. Cuando sea adecuado, encierra la respuesta final entre las etiquetas <final_answer>...</final_answer>.\n\nNota sobre la extensión: Incluye únicamente año, descubridor y aporte principal. Excluye datos hospitalarios, fabricación en serie y el contexto de guerra.\n\nRestricción: Sé breve y no reproduzcas la pregunta.\n\nRestricción: Sé breve y no reproduzcas la pregunta.",
+  "accuracy": 0.8636363636363636,
+  "accuracy_short": 0.7142857142857143,
+  "accuracy_long": 1.0,
+  "fuzzy_short_accuracy": 0.7828174963036993,
+  "judge_score_long": 0.8195652173913043,
+  "tokens_in_total": 12511,
+  "tokens_out_total": 3091,
+  "cost_in_usd": 0.0075065999999999996,
+  "cost_out_usd": 0.0074183999999999995,
+  "cost_total_usd": 0.014924999999999999,
+  "latency_ms_mean": 78790.33835134082,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 3466.779695917001
+}

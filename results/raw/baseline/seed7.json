@@ -1,0 +1,19 @@
+{
+  "condition": "baseline",
+  "seed": 7,
+  "final_prompt": "Responde la siguiente pregunta de la forma más precisa posible. Cuando aplique, entrega la respuesta final entre <final_answer>...</final_answer>.",
+  "accuracy": 0.9318181818181818,
+  "accuracy_short": 0.8571428571428571,
+  "accuracy_long": 1.0,
+  "fuzzy_short_accuracy": 0.8668660457030868,
+  "judge_score_long": 0.958695652173913,
+  "tokens_in_total": 9695,
+  "tokens_out_total": 9701,
+  "cost_in_usd": 0.005817,
+  "cost_out_usd": 0.023282399999999998,
+  "cost_total_usd": 0.029099399999999997,
+  "latency_ms_mean": 0.0,
+  "n_generations": 0,
+  "n_llm_calls": 44,
+  "elapsed_seconds": 195.79924045799999
+}

@@ -1,0 +1,19 @@
+{
+  "condition": "crop",
+  "seed": 6,
+  "final_prompt": "Eres un asistente útil. Piensa paso a paso en voz alta, justifica cada decisión con detalle, y entrega la respuesta final entre <final_answer>...</final_answer>.\n\nNota del editor: Incluye definición, modo de ejecución y funciones clave en una sola frase compacta.\nIntenta ser tan conciso como esta versión: Kernel = núcleo del SO. Media entre hardware y software en modo privilegiado. Gestiona procesos, memoria, E/S y dispositivos.",
+  "accuracy": 0.7954545454545454,
+  "accuracy_short": 0.6666666666666666,
+  "accuracy_long": 1.0,
+  "fuzzy_short_accuracy": 0.6902570691555316,
+  "judge_score_long": 0.7176470588235293,
+  "tokens_in_total": 12375,
+  "tokens_out_total": 4067,
+  "cost_in_usd": 0.007425,
+  "cost_out_usd": 0.0097608,
+  "cost_total_usd": 0.0171858,
+  "latency_ms_mean": 37086.38532859087,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "elapsed_seconds": 1631.8063938749983
+}

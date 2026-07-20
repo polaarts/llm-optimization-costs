@@ -1,0 +1,23 @@
+{
+  "condition": "capo",
+  "seed": 6,
+  "final_prompt": "Facilita una contestación lo más exacta y rigurosa que puedas a la pregunta planteada. En caso de resultar apropiado, delimita la respuesta definitiva utilizando las marcas <final_answer>...</final_answer>.",
+  "accuracy": 0.5,
+  "accuracy_short": 0.8148148148148148,
+  "accuracy_long": 0.0,
+  "fuzzy_short_accuracy": 0.8607086219010337,
+  "judge_score_long": 0.18905985397172534,
+  "tokens_in_total": 10615,
+  "tokens_out_total": 6926,
+  "cost_in_usd": 0.006369,
+  "cost_out_usd": 0.0166224,
+  "cost_total_usd": 0.0229914,
+  "latency_ms_mean": 72104.53572252275,
+  "n_generations": 4,
+  "n_llm_calls": 44,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 3172.6032428750004
+}

@@ -1,0 +1,23 @@
+{
+  "condition": "capo",
+  "seed": 8,
+  "final_prompt": "Responde con la mayor precisión posible a la interrogante formulada. Cuando aplique, envuelve la respuesta concluyente entre las etiquetas <final_answer>...</final_answer>.\n\nRestricción adicional: presenta primero el veredicto y luego una breve justificación.\n\nDevuelve únicamente el prompt reformulado, sin comillas ni etiquetas que lo envuelvan.\n\nRestricción adicional: Responde de forma concisa, sin repetir la pregunta.",
+  "accuracy": 0.29545454545454547,
+  "accuracy_short": 0.8666666666666667,
+  "accuracy_long": 0.0,
+  "fuzzy_short_accuracy": 0.9135238095238096,
+  "judge_score_long": 0.20915656609765146,
+  "tokens_in_total": 10328,
+  "tokens_out_total": 10494,
+  "cost_in_usd": 0.0061968,
+  "cost_out_usd": 0.0251856,
+  "cost_total_usd": 0.0313824,
+  "latency_ms_mean": 51177.02703786364,
+  "n_generations": 4,
+  "n_llm_calls": 44,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 2251.7938783749996
+}

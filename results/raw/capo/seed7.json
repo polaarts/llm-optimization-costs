@@ -1,0 +1,23 @@
+{
+  "condition": "capo",
+  "seed": 7,
+  "final_prompt": "Desarrolla el razonamiento paso a paso y, al finalizar, muestra la respuesta entre las marcas <final_answer>...</final_answer>. Procura que la argumentación sea breve y directa.",
+  "accuracy": 0.38636363636363635,
+  "accuracy_short": 0.8095238095238095,
+  "accuracy_long": 0.0,
+  "fuzzy_short_accuracy": 0.8626258897165846,
+  "judge_score_long": 0.202825143831201,
+  "tokens_in_total": 10135,
+  "tokens_out_total": 10054,
+  "cost_in_usd": 0.006081,
+  "cost_out_usd": 0.0241296,
+  "cost_total_usd": 0.0302106,
+  "latency_ms_mean": 86014.17390056816,
+  "n_generations": 4,
+  "n_llm_calls": 44,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 3784.6283272500004
+}

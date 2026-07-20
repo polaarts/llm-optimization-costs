@@ -1,0 +1,19 @@
+{
+  "condition": "crop",
+  "seed": 5,
+  "final_prompt": "Eres un asistente útil. Piensa paso a paso en voz alta, justifica cada decisión con detalle, y entrega la respuesta final entre <final_answer>...</final_answer>.\n\nNota del editor: Resumen de una sola oración; podría añadirse el uso principal (cifrado y firma) si se requiere más detalle.\nIntenta ser tan conciso como esta versión: Criptografía de clave pública: sistema asimétrico con dos claves (pública/privada) que cifra con una y descifra con la otra.",
+  "accuracy": 0.7954545454545454,
+  "accuracy_short": 0.6086956521739131,
+  "accuracy_long": 1.0,
+  "fuzzy_short_accuracy": 0.6949428091084565,
+  "judge_score_long": 0.745238095238095,
+  "tokens_in_total": 13158,
+  "tokens_out_total": 4338,
+  "cost_in_usd": 0.007894799999999999,
+  "cost_out_usd": 0.010411199999999999,
+  "cost_total_usd": 0.018305999999999996,
+  "latency_ms_mean": 35999.877202659096,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "elapsed_seconds": 1583.9989182499994
+}

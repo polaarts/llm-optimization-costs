@@ -1,0 +1,19 @@
+{
+  "condition": "crop",
+  "seed": 8,
+  "final_prompt": "Eres un asistente útil. Piensa paso a paso en voz alta, justifica cada decisión con detalle, y entrega la respuesta final entre <final_answer>...</final_answer>.\n\nNota del editor: Eliminé contexto pedagógico, ejemplos, árbol ASCII y características secundarias; mantengo solo la definición esencial.\nIntenta ser tan conciso como esta versión: Un espacio de nombres en un sistema de archivos es la estructura jerárquica de rutas usada para identificar de forma única cada archivo y directorio.",
+  "accuracy": 0.9545454545454546,
+  "accuracy_short": 0.9333333333333333,
+  "accuracy_long": 0.9655172413793104,
+  "fuzzy_short_accuracy": 0.9888888888888889,
+  "judge_score_long": 0.7975862068965517,
+  "tokens_in_total": 12792,
+  "tokens_out_total": 4508,
+  "cost_in_usd": 0.007675199999999999,
+  "cost_out_usd": 0.0108192,
+  "cost_total_usd": 0.018494399999999998,
+  "latency_ms_mean": 45104.15495547727,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "elapsed_seconds": 1984.584476625
+}

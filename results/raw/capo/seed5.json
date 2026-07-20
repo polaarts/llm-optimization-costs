@@ -1,0 +1,23 @@
+{
+  "condition": "capo",
+  "seed": 5,
+  "final_prompt": "Contesta la pregunta que se presenta a continuación con la mayor exactitud que puedas. De ser posible, enmarca tu respuesta definitiva dentro de las etiquetas <final_answer>...</final_answer>.\n\nRestricción adicional: Limita tu respuesta a un máximo de 30 palabras.\n\nRestricción adicional: Limita tu respuesta a un máximo de 30 palabras.\n\nRestricción adicional: Sé breve y directo, evitando reproducir el enunciado.",
+  "accuracy": 0.38636363636363635,
+  "accuracy_short": 0.7391304347826086,
+  "accuracy_long": 0.0,
+  "fuzzy_short_accuracy": 0.8347051738844607,
+  "judge_score_long": 0.1865899367626597,
+  "tokens_in_total": 12278,
+  "tokens_out_total": 1149,
+  "cost_in_usd": 0.0073668,
+  "cost_out_usd": 0.0027576000000000002,
+  "cost_total_usd": 0.0101244,
+  "latency_ms_mean": 69514.02485038633,
+  "n_generations": 4,
+  "n_llm_calls": 44,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 3058.619891250002
+}

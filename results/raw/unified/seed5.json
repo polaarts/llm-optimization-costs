@@ -1,0 +1,23 @@
+{
+  "condition": "unified",
+  "seed": 5,
+  "final_prompt": "Brinda una respuesta exacta a la pregunta planteada. En caso de ser pertinente, sitúa la respuesta definitiva dentro de las etiquetas <final_answer>...</final_answer>.\n\nRestricción: tu respuesta no debe superar las 30 palabras.\n\nRestricción: tu respuesta no debe superar las 30 palabras.\n\nRestricción: sé breve y evita repetir el enunciado.",
+  "accuracy": 0.8409090909090909,
+  "accuracy_short": 0.782608695652174,
+  "accuracy_long": 0.9047619047619048,
+  "fuzzy_short_accuracy": 0.8526178354183469,
+  "judge_score_long": 0.6333333333333332,
+  "tokens_in_total": 11706,
+  "tokens_out_total": 1213,
+  "cost_in_usd": 0.0070236,
+  "cost_out_usd": 0.0029112,
+  "cost_total_usd": 0.0099348,
+  "latency_ms_mean": 67628.62869127275,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 2975.664168000003
+}

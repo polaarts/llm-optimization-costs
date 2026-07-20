@@ -1,0 +1,23 @@
+{
+  "condition": "unified",
+  "seed": 9,
+  "final_prompt": "Proporciona una respuesta precisa a la pregunta formulada. Cuando proceda, encierra la respuesta concluyente entre las etiquetas <final_answer>...</final_answer>.",
+  "accuracy": 0.9318181818181818,
+  "accuracy_short": 0.8333333333333334,
+  "accuracy_long": 1.0,
+  "fuzzy_short_accuracy": 0.8530660161094944,
+  "judge_score_long": 0.9384615384615385,
+  "tokens_in_total": 9857,
+  "tokens_out_total": 6931,
+  "cost_in_usd": 0.0059142,
+  "cost_out_usd": 0.016634399999999997,
+  "cost_total_usd": 0.022548599999999995,
+  "latency_ms_mean": 98364.97734186362,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 4328.065006249999
+}

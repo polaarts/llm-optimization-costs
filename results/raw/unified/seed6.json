@@ -1,0 +1,23 @@
+{
+  "condition": "unified",
+  "seed": 6,
+  "final_prompt": "Facilita una respuesta lo más exacta posible a la pregunta planteada. Si conviene, delimita la respuesta definitiva con <final_answer>...</final_answer>.\n\nNota sobre síntesis: es suficiente con un encabezado breve que condense la idea principal; los matices pueden ampliarse en el cuerpo.\n\nRecordatorio de brevedad: condensa las definiciones y el vínculo esencial en una sola línea corta.",
+  "accuracy": 0.8636363636363636,
+  "accuracy_short": 0.7777777777777778,
+  "accuracy_long": 1.0,
+  "fuzzy_short_accuracy": 0.8283053520794098,
+  "judge_score_long": 0.7441176470588233,
+  "tokens_in_total": 11891,
+  "tokens_out_total": 1867,
+  "cost_in_usd": 0.0071346,
+  "cost_out_usd": 0.0044808,
+  "cost_total_usd": 0.0116154,
+  "latency_ms_mean": 118635.81093181827,
+  "n_generations": 4,
+  "n_llm_calls": 220,
+  "n_survivors": 4,
+  "pairwise_test": "wilcoxon",
+  "correction": "holm",
+  "population_size": 8,
+  "elapsed_seconds": 5219.980315042005
+}
